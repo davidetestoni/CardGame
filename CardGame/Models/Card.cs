@@ -21,5 +21,10 @@
         /// The description of the card.
         /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// The game instance the card belongs to.
+        /// </summary>
+        public GameInstance Game { get; set; }
     }
 }

@@ -2,6 +2,9 @@
 {
     public class SpellCard : Card
     {
+        public void ProcEffect()
+        {
 
+        }
     }
 }

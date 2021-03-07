@@ -1,5 +1,6 @@
 ﻿using CardGame.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CardGame
 {
@@ -23,7 +24,7 @@ namespace CardGame
         /// <summary>
         /// The cards on the field.
         /// </summary>
-        public List<Card> Field { get; set; }
+        public List<CreatureCard> Field { get; set; }
 
         /// <summary>
         /// The cards in the graveyard.

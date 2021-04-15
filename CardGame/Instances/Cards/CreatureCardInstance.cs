@@ -1,75 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CardGame.Events;
+using System;
 
-namespace CardGame.Models
+namespace CardGame.Models.Cards.Instances
 {
-    public class CreatureCard : Card
+    public class CreatureCardInstance : CardInstance
     {
-        #region Public Properties
-        /// <summary>
-        /// The base value of the attack of this card.
-        /// </summary>
-        public int BaseAttack { get; set; }
+        // ------------
+        //  PROPERTIES
+        // ------------
+        // These represent the current stats of a card, and they can be changed during
+        // the course of the game.
 
+        #region Properties
         /// <summary>
         /// The current value of the attack of this card.
         /// </summary>
         public int Attack { get; set; }
 
         /// <summary>
-        /// The base value of the health of this card.
-        /// </summary>
-        public int BaseHealth { get; set; }
-
-        /// <summary>
         /// The current value of the health of this card.
         /// </summary>
         public int Health { get; set; }
-
-        /// <summary>
-        /// The effects of this card.
-        /// </summary>
-        public List<Effect> Effects { get; set; }
         #endregion
 
+        // --------
+        //  EVENTS
+        // --------
+        // Events are useful to display information about the attack.
+        // Do not use events to proc effects, because they are not waited!
+
         #region Events
-        public event EventHandler<int> Damaged;
+        /// <summary>
+        /// Called when this card is damaged. The argument is the amount of incoming damage,
+        /// after mitigation due to external factors.
+        /// </summary>
+        public event EventHandler<DamagedEventArgs> Damaged;
+
+        /// <summary>
+        /// Called when this card is destroyed
+        /// </summary>
         public event EventHandler Destroyed;
         #endregion
 
-        #region Constructors
-        public CreatureCard()
-        {
-
-        }
-
-        public CreatureCard(string id, string name, int manaCost = 1, int baseAttack = 1, int baseHealth = 1, string description = "")
-        {
-            // Metadata
-            Id = id;
-            Name = name;
-            Description = description;
-
-            // Mana
-            ManaCost = manaCost;
-
-            // Attack
-            BaseAttack = baseAttack;
-            Attack = baseAttack;
-
-            // Health
-            BaseHealth = baseHealth;
-            Health = baseHealth;
-        }
-        #endregion
+        // -----------------
+        //  VIRTUAL METHODS
+        // -----------------
+        // When something happens on the field, these are called. Advanced cards can override
+        // these to provide additional features.
 
         #region Virtual Methods
         /// <summary>
-        /// Called before this card attacks a target.
-        /// Returns the damage dealt by this card.
+        /// Called before this card attacks a target. Returns the damage dealt by this card.
         /// </summary>
         /// <param name="target">The card that is being attacked</param>
-        public virtual int CalculateDamage(Card target) => Attack;
+        public virtual int GetAttackDamage(CreatureCardInstance target) => Attack;
 
         /// <summary>
         /// Called when a card is damaged by another card (spell or creature).

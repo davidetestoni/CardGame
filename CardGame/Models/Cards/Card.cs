@@ -1,14 +1,20 @@
-﻿namespace CardGame.Models
+﻿using CardGame.Models.Cards.Instances;
+using System;
+
+namespace CardGame.Models.Cards
 {
+    /// <summary>
+    /// This is the representation of a game card with its base values.
+    /// </summary>
     public abstract class Card
     {
         /// <summary>
-        /// The unique id of the card, for example Soldier.
+        /// The unique id of the card, (e.g. Soldier).
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// The name of the card, for example Basic Soldier.
+        /// The name of the card, (e.g. Basic Soldier).
         /// </summary>
         public string Name { get; set; }
 
@@ -23,8 +29,8 @@
         public string Description { get; set; }
 
         /// <summary>
-        /// The game instance the card belongs to.
+        /// Creates an instance of the card.
         /// </summary>
-        public GameInstance Game { get; set; }
+        public virtual CardInstance CreateInstance(GameInstance game) => throw new NotImplementedException();
     }
 }

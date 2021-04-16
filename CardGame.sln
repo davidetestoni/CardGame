@@ -3,11 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31019.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame", "CardGame\CardGame.csproj", "{2301B54C-AE4F-45C1-8663-CD950FE62306}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame.Server", "CardGame.Server\CardGame.Server.csproj", "{2301B54C-AE4F-45C1-8663-CD950FE62306}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame.Tests", "CardGame.Tests\CardGame.Tests.csproj", "{584A2C99-FFC4-4C06-A01A-63C7C36F384F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardGame.Sample", "CardGame.Sample\CardGame.Sample.csproj", "{70B53473-A0D3-4370-81CD-D6DD2A4D1338}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame.Sample", "CardGame.Sample\CardGame.Sample.csproj", "{70B53473-A0D3-4370-81CD-D6DD2A4D1338}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame.Client", "CardGame.Client\CardGame.Client.csproj", "{F39D0C3B-4498-457B-9298-C6F0175566D8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame.Shared", "CardGame.Shared\CardGame.Shared.csproj", "{CAB299B6-622F-45EE-90A3-EDCFE95A472A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{39D2C79C-12F6-4262-AEA3-4D52C547B25E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Server", "Sample.Server\Sample.Server.csproj", "{722CCB83-C444-4976-81EA-AE86F8366F44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Client", "Sample.Client\Sample.Client.csproj", "{E9EB6C98-A262-4289-A504-C83C0982741D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,9 +37,29 @@ Global
 		{70B53473-A0D3-4370-81CD-D6DD2A4D1338}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70B53473-A0D3-4370-81CD-D6DD2A4D1338}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70B53473-A0D3-4370-81CD-D6DD2A4D1338}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F39D0C3B-4498-457B-9298-C6F0175566D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F39D0C3B-4498-457B-9298-C6F0175566D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F39D0C3B-4498-457B-9298-C6F0175566D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F39D0C3B-4498-457B-9298-C6F0175566D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAB299B6-622F-45EE-90A3-EDCFE95A472A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAB299B6-622F-45EE-90A3-EDCFE95A472A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAB299B6-622F-45EE-90A3-EDCFE95A472A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAB299B6-622F-45EE-90A3-EDCFE95A472A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{722CCB83-C444-4976-81EA-AE86F8366F44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{722CCB83-C444-4976-81EA-AE86F8366F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{722CCB83-C444-4976-81EA-AE86F8366F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{722CCB83-C444-4976-81EA-AE86F8366F44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9EB6C98-A262-4289-A504-C83C0982741D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9EB6C98-A262-4289-A504-C83C0982741D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9EB6C98-A262-4289-A504-C83C0982741D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9EB6C98-A262-4289-A504-C83C0982741D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{722CCB83-C444-4976-81EA-AE86F8366F44} = {39D2C79C-12F6-4262-AEA3-4D52C547B25E}
+		{E9EB6C98-A262-4289-A504-C83C0982741D} = {39D2C79C-12F6-4262-AEA3-4D52C547B25E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4C478857-A039-4E88-9FF4-65B3B75CD28D}

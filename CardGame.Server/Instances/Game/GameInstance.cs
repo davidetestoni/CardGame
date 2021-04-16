@@ -1,6 +1,7 @@
 ﻿using CardGame.Server.Factories;
 using CardGame.Server.Instances.Players;
 using CardGame.Server.Models.Cards.Instances;
+using CardGame.Shared.Enums;
 using CardGame.Shared.Models.Cards;
 using System;
 using System.Linq;
@@ -68,11 +69,19 @@ namespace CardGame.Server.Instances.Game
                 throw new Exception($"There are already {Options.FieldSize} cards on the field");
             }
                 
+            // Remove the card from the player's hand and subtract the mana spent
             player.Hand.Remove(card);
             player.CurrentMana -= card.ManaCost;
 
+            // Create an instance of the card and add it to the field
             var instance = (CreatureCardInstance)_cardFactory.Create(card.ShortName, this, player);
             player.Field.Add(instance);
+
+            // If the card has Rush, reset its attacks left
+            if (instance.Features.HasFlag(CardFeature.Rush))
+            {
+                instance.ResetAttacksLeft();
+            }
 
             NotifyAllExceptSelf(instance, c => c.OnCreaturePlayed(player, instance));
         }
@@ -103,15 +112,47 @@ namespace CardGame.Server.Instances.Game
             // Draw a card
             DrawCards(CurrentPlayer, 1, true);
 
+            // Reset the attacks left for all allied creatures
+            CurrentPlayer.Field.ForEach(c => c.ResetAttacksLeft());
+
             // Proc effects for the turn start
             NotifyAll(c => c.OnTurnStart(CurrentPlayer, TurnNumber));
         }
 
+        public void AttackCreature(PlayerInstance player, CreatureCardInstance attacker, CreatureCardInstance target)
+        {
+            CheckTurn(player);
+
+            // If the card has no attacks left
+            if (attacker.AttacksLeft == 0)
+            {
+                throw new Exception("This card cannot attack anymore during this turn");
+            }
+
+            // If there's a card with taunt but I'm not attacking a card with taunt
+            if (Opponent.Field.Any(c => c.Features.HasFlag(CardFeature.Taunt)) && !target.Features.HasFlag(CardFeature.Taunt))
+            {
+                throw new Exception("There's a card with taunt on the opponent's field");
+            }
+
+            NotifyAll(c => c.OnBeforeAttack(attacker, target));
+
+            attacker.AttacksLeft--;
+
+            var damage = attacker.GetAttackDamage(target);
+            var recoilDamage = target.GetAttackDamage(target);
+
+            NotifyAll(c => c.OnCardDamaged(attacker, target, damage));
+            NotifyAll(c => c.OnCardDamaged(target, attacker, recoilDamage));
+        }
+        #endregion
+
+        #region Internal Methods
         /// <summary>
         /// Draws <paramref name="count"/> cards from the <paramref name="player"/>'s deck.
         /// </summary>
         /// <param name="isInitialDraw">Whether this is the initial draw that happens at the start of a player's turn</param>
-        public void DrawCards(PlayerInstance player, int count, bool isInitialDraw)
+        internal void DrawCards(PlayerInstance player, int count, bool isInitialDraw)
         {
             int drawn = 0;
 
@@ -141,6 +182,16 @@ namespace CardGame.Server.Instances.Game
             }
 
             NotifyAll(c => c.OnCardsDrawn(player, count, isInitialDraw));
+        }
+
+        /// <summary>
+        /// Destroys a card on the field and sends it to the graveyard.
+        /// </summary>
+        internal void DestroyCard(CardInstance destroyer, CreatureCardInstance target)
+        {
+            NotifyAll(c => c.OnCardDestroyed(destroyer, target));
+            target.Owner.Field.Remove(target);
+            target.Owner.Graveyard.Add(target.Base);
         }
         #endregion
 

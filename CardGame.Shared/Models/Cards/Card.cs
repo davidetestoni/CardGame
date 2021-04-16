@@ -8,21 +8,26 @@
         /// <summary>
         /// The unique shortname of the card, (e.g. Soldier).
         /// </summary>
-        public virtual string ShortName { get; } = "ShortName";
+        public string ShortName { get; init; } = "ShortName";
 
         /// <summary>
         /// The name of the card, (e.g. Basic Soldier).
         /// </summary>
-        public virtual string Name { get; } = "Name";
+        public string Name { get; init; } = "Name";
 
         /// <summary>
         /// How much mana is needed to summon this card.
         /// </summary>
-        public virtual int ManaCost { get; } = 1;
+        public int ManaCost { get; init; } = 1;
 
         /// <summary>
         /// The description of the card.
         /// </summary>
-        public virtual string Description { get; } = "Description";
+        public string Description { get; init; } = "Description";
+
+        /// <summary>
+        /// The string to get the art of the card.
+        /// </summary>
+        public string Art { get; set; } = string.Empty;
     }
 }

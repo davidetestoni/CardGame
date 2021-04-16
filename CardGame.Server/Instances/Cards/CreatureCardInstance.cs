@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CardGame.Server.Instances.Players;
+using CardGame.Shared.Enums;
+using System;
 
 namespace CardGame.Server.Models.Cards.Instances
 {
@@ -14,12 +16,17 @@ namespace CardGame.Server.Models.Cards.Instances
         /// <summary>
         /// The current value of the attack of this card.
         /// </summary>
-        public int Attack { get; set; }
+        public int Attack { get; set; } = 1;
 
         /// <summary>
         /// The current value of the health of this card.
         /// </summary>
-        public int Health { get; set; }
+        public int Health { get; set; } = 1;
+
+        /// <summary>
+        /// Gets the current card features.
+        /// </summary>
+        public CardFeature Features { get; set; } = CardFeature.None;
         #endregion
 
         // -----------------
@@ -84,14 +91,14 @@ namespace CardGame.Server.Models.Cards.Instances
         /// </summary>
         /// <param name="player">The player that is currently playing the turn</param>
         /// <param name="turnNumber">The number of turns that passed since the start of the game</param>
-        public virtual void OnTurnStart(Player player, int turnNumber) { }
+        public virtual void OnTurnStart(PlayerInstance player, int turnNumber) { }
 
         /// <summary>
         /// Called at the end of a player's turn.
         /// </summary>
         /// <param name="player">The player that is currently playing the turn</param>
         /// <param name="turnNumber">The number of turns that passed since the start of the game</param>
-        public virtual void OnTurnEnd(Player player, int turnNumber) { }
+        public virtual void OnTurnEnd(PlayerInstance player, int turnNumber) { }
 
         /// <summary>
         /// Called when a player draws cards from the deck.
@@ -99,14 +106,14 @@ namespace CardGame.Server.Models.Cards.Instances
         /// <param name="player">The player that drew the cards</param>
         /// <param name="count">The amount of cards that were drawn</param>
         /// <param name="isInitialDraw">Whether this is the initial draw that happens at the start of a player's turn</param>
-        public virtual void OnCardsDrawn(Player player, int count, bool isInitialDraw) { }
+        public virtual void OnCardsDrawn(PlayerInstance player, int count, bool isInitialDraw) { }
 
         /// <summary>
         /// Called when a card is placed on the field by a player.
         /// </summary>
         /// <param name="player">The player that placed the card</param>
         /// <param name="newCard">The card that just joined the field</param>
-        public virtual void OnCardPlayed(Player player, Card newCard) { }
+        public virtual void OnCreaturePlayed(PlayerInstance player, CreatureCardInstance newCard) { }
         #endregion
     }
 }

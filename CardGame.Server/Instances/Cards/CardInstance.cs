@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CardGame.Server.Instances.Game;
+using CardGame.Server.Instances.Players;
+using CardGame.Shared.Models.Cards;
+using System;
 
 namespace CardGame.Server.Models.Cards.Instances
 {
@@ -12,6 +15,11 @@ namespace CardGame.Server.Models.Cards.Instances
         /// A reference to the game instance to which the card belongs.
         /// </summary>
         public GameInstance Game { get; set; }
+
+        /// <summary>
+        /// A reference to the player that currently owns this card.
+        /// </summary>
+        public PlayerInstance Owner { get; set; }
 
         /// <summary>
         /// This is the original card from which the instance was created.

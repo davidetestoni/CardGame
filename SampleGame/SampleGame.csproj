@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CardGame.Server\CardGame.Server.csproj" />
     <ProjectReference Include="..\CardGame.Shared\CardGame.Shared.csproj" />
   </ItemGroup>
 

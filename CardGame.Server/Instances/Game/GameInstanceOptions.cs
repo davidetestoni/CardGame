@@ -1,4 +1,4 @@
-﻿namespace CardGame.Server.Models
+﻿namespace CardGame.Server.Instances.Game
 {
     public class GameInstanceOptions
     {

@@ -1,12 +1,21 @@
-﻿using CardGame.Shared.Models.Cards;
+﻿using CardGame.Server.Models.Cards.Instances;
+using CardGame.Shared.Attributes;
+using CardGame.Shared.Models.Cards;
 
 namespace SampleGame.Cards.Creatures
 {
-    public class BasicSoldier : Card
+    [PlayableCard(typeof(CreatureCardInstance))]
+    public class BasicSoldier : CreatureCard
     {
-        public override string ShortName => "BasicSoldier";
-        public override string Name => "Basic Soldier";
-        public override string Description => "Description of a basic soldier";
-        public override int ManaCost => 1;
+        public BasicSoldier()
+        {
+            ShortName = "BasicSoldier";
+            Name = "Basic Soldier";
+            Description = "Description of a basic soldier";
+            
+            ManaCost = 1;
+            Attack = 1;
+            Health = 2;
+        }
     }
 }

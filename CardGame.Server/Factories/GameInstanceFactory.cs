@@ -1,24 +1,26 @@
-﻿using CardGame.Server.Models;
+﻿using CardGame.Server.Instances.Game;
+using CardGame.Shared.Models.Players;
 
 namespace CardGame.Server.Factories
 {
     public class GameInstanceFactory
     {
-        public GameInstance Create(GameInstanceOptions options, PlayerDefinition playerOne, PlayerDefinition playerTwo)
+        private readonly CardInstanceFactory _cardFactory;
+        private readonly PlayerInstanceFactory _playerFactory;
+
+        public GameInstanceFactory(CardInstanceFactory cardFactory, PlayerInstanceFactory playerFactory)
         {
-            return new GameInstance()
+            _cardFactory = cardFactory;
+            _playerFactory = playerFactory;
+        }
+
+        public GameInstance Create(GameInstanceOptions options, Player playerOne, Player playerTwo)
+        {
+            return new GameInstance(_cardFactory)
             {
                 Options = options,
-                PlayerOne = new()
-                {
-                    Name = playerOne.Name,
-                    Deck = playerOne.Deck
-                },
-                PlayerTwo = new()
-                {
-                    Name = playerTwo.Name,
-                    Deck = playerTwo.Deck
-                }
+                PlayerOne = _playerFactory.Create(playerOne),
+                PlayerTwo = _playerFactory.Create(playerTwo)
             };
         }
     }

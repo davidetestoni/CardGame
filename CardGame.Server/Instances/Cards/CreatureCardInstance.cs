@@ -1,4 +1,5 @@
-﻿using CardGame.Server.Instances.Players;
+﻿using CardGame.Server.Enums;
+using CardGame.Server.Instances.Players;
 using CardGame.Shared.Enums;
 
 namespace CardGame.Server.Models.Cards.Instances
@@ -120,8 +121,8 @@ namespace CardGame.Server.Models.Cards.Instances
         /// </summary>
         /// <param name="player">The player that drew the cards</param>
         /// <param name="count">The amount of cards that were drawn</param>
-        /// <param name="isInitialDraw">Whether this is the initial draw that happens at the start of a player's turn</param>
-        public virtual void OnCardsDrawn(PlayerInstance player, int count, bool isInitialDraw) { }
+        /// <param name="drawEventSource">The cause of the draw</param>
+        public virtual void OnCardsDrawn(PlayerInstance player, int count, DrawEventSource drawEventSource = DrawEventSource.Effect) { }
 
         /// <summary>
         /// Called when a card is placed on the field by a player.

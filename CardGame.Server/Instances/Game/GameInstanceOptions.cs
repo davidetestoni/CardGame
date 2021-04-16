@@ -8,6 +8,11 @@
         public int MaximumMana { get; set; } = 10;
 
         /// <summary>
+        /// The initial amount of health a player has.
+        /// </summary>
+        public int InitialHealth { get; set; } = 30;
+
+        /// <summary>
         /// The maximum amount of cards players can have in their hand.
         /// </summary>
         public int MaximumHandSize { get; set; } = 10;

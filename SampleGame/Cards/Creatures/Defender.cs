@@ -14,8 +14,8 @@ namespace SampleGame.Cards.Creatures
             Description = "Description of a defender";
 
             ManaCost = 3;
-            Attack = 1;
-            Health = 5;
+            Attack = 2;
+            Health = 2;
         }
     }
 }

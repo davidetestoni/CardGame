@@ -15,7 +15,7 @@ namespace SampleGame.Cards.Creatures
             
             ManaCost = 1;
             Attack = 1;
-            Health = 2;
+            Health = 1;
         }
     }
 }

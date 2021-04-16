@@ -1,4 +1,5 @@
 ﻿using CardGame.Server.Instances.Game;
+using CardGame.Server.Instances.Players;
 using CardGame.Shared.Models.Players;
 
 namespace CardGame.Server.Factories
@@ -19,9 +20,18 @@ namespace CardGame.Server.Factories
             return new GameInstance(_cardFactory)
             {
                 Options = options,
-                PlayerOne = _playerFactory.Create(playerOne),
-                PlayerTwo = _playerFactory.Create(playerTwo)
+                PlayerOne = CreatePlayer(options, playerOne),
+                PlayerTwo = CreatePlayer(options, playerTwo)
             };
+        }
+
+        private PlayerInstance CreatePlayer(GameInstanceOptions options, Player player)
+        {
+            var instance = _playerFactory.Create(player);
+            instance.InitialHealth = options.InitialHealth;
+            instance.CurrentHealth = options.InitialHealth;
+
+            return instance;
         }
     }
 }

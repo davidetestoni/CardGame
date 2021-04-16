@@ -1,4 +1,5 @@
-﻿using CardGame.Server.Instances.Game;
+﻿using CardGame.Server.Extensions;
+using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
 using CardGame.Shared.Models.Cards;
 using CardGame.Shared.Models.Players;
@@ -38,6 +39,10 @@ namespace CardGame.Server.Factories
                 }
             }
 
+            // Try to use a somewhat random seed to prevent shuffling the decks of the
+            // two players in the same exact way.
+            var random = new Random(instance.Id.GetHashCode());
+            deck.Shuffle(random);
             instance.Deck = deck;
 
             return instance;

@@ -1,4 +1,5 @@
-﻿using CardGame.Server.Factories;
+﻿using CardGame.Server.Enums;
+using CardGame.Server.Factories;
 using CardGame.Server.Instances.Players;
 using CardGame.Server.Models.Cards.Instances;
 using CardGame.Shared.Enums;
@@ -38,12 +39,16 @@ namespace CardGame.Server.Instances.Game
 
         #region Public Methods
         /// <summary>
-        /// Randomly selects the current player, draws the initial hand and starts the game.
+        /// Randomly selects the current player, draws the initial hands and starts the game.
         /// </summary>
         public void Start()
         {
             CurrentPlayer = Random.Next() % 2 == 0 ? PlayerOne : PlayerTwo;
-            DrawCards(CurrentPlayer, Options.InitialHandSize, true);
+            CurrentPlayer.MaximumMana = 1;
+            CurrentPlayer.CurrentMana = 1;
+            DrawCards(Opponent, Options.InitialHandSize, DrawEventSource.GameStart);
+            DrawCards(CurrentPlayer, Options.InitialHandSize, DrawEventSource.GameStart);
+            DrawCards(CurrentPlayer, 1, DrawEventSource.TurnStart);
             Status = GameStatus.Started;
         }
 
@@ -110,7 +115,7 @@ namespace CardGame.Server.Instances.Game
             CurrentPlayer.CurrentMana = CurrentPlayer.MaximumMana;
 
             // Draw a card
-            DrawCards(CurrentPlayer, 1, true);
+            DrawCards(CurrentPlayer, 1, DrawEventSource.TurnStart);
 
             // Reset the attacks left for all allied creatures
             CurrentPlayer.Field.ForEach(c => c.ResetAttacksLeft());
@@ -145,22 +150,26 @@ namespace CardGame.Server.Instances.Game
             NotifyAll(c => c.OnCardDamaged(attacker, target, damage));
             NotifyAll(c => c.OnCardDamaged(target, attacker, recoilDamage));
         }
-        #endregion
 
-        #region Internal Methods
         /// <summary>
         /// Draws <paramref name="count"/> cards from the <paramref name="player"/>'s deck.
         /// </summary>
-        /// <param name="isInitialDraw">Whether this is the initial draw that happens at the start of a player's turn</param>
-        internal void DrawCards(PlayerInstance player, int count, bool isInitialDraw)
+        /// <param name="drawEventSource">The cause of the draw</param>
+        public void DrawCards(PlayerInstance player, int count, DrawEventSource drawEventSource = DrawEventSource.Effect)
         {
+            if (drawEventSource != DrawEventSource.GameStart)
+            {
+                CheckTurn(player);
+            }
+
             int drawn = 0;
 
             while (drawn < count)
             {
                 if (player.Deck.Count == 0)
                 {
-                    // TODO: When a player runs out of cards, deal damage to the player
+                    DamagePlayer(player, 1);
+                    return;
                 }
                 else
                 {
@@ -179,19 +188,56 @@ namespace CardGame.Server.Instances.Game
                         player.Graveyard.Add(card);
                     }
                 }
+
+                drawn++;
             }
 
-            NotifyAll(c => c.OnCardsDrawn(player, count, isInitialDraw));
+            NotifyAll(c => c.OnCardsDrawn(player, count, drawEventSource));
         }
 
         /// <summary>
         /// Destroys a card on the field and sends it to the graveyard.
         /// </summary>
-        internal void DestroyCard(CardInstance destroyer, CreatureCardInstance target)
+        public void DestroyCard(CardInstance destroyer, CreatureCardInstance target)
         {
             NotifyAll(c => c.OnCardDestroyed(destroyer, target));
             target.Owner.Field.Remove(target);
             target.Owner.Graveyard.Add(target.Base);
+        }
+
+        /// <summary>
+        /// Damage the player due to an effect (not for direct attacks).
+        /// </summary>
+        public void DamagePlayer(PlayerInstance target, int damage)
+        {
+            if (target.CurrentHealth > damage)
+            {
+                target.CurrentHealth -= damage;
+            }
+            else
+            {
+                target.CurrentHealth = 0;
+                CheckVictory();
+            }
+        }
+
+        /// <summary>
+        /// Checks the victory condition and possibly ends the game.
+        /// </summary>
+        public void CheckVictory()
+        {
+            // If both players's health drops to 0 at the same time, the player that is currently
+            // playing will lose.
+            if (CurrentPlayer.CurrentHealth == 0)
+            {
+                Status = GameStatus.Finished;
+                Winner = Opponent;
+            }
+            else if (Opponent.CurrentHealth == 0)
+            {
+                Status = GameStatus.Finished;
+                Winner = CurrentPlayer;
+            }
         }
         #endregion
 

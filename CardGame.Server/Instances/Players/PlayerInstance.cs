@@ -50,8 +50,8 @@ namespace CardGame.Server.Instances.Players
         public int CurrentHealth { get; set; }
 
         /// <summary>
-        /// The maximum amount of health the player can have.
+        /// The initial amount of health the player has.
         /// </summary>
-        public int MaximumHealth { get; set; }
+        public int InitialHealth { get; set; }
     }
 }

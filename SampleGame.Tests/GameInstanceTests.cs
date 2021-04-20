@@ -1,4 +1,4 @@
-using CardGame.Server.Enums;
+﻿using CardGame.Server.Enums;
 using CardGame.Server.Factories;
 using CardGame.Server.Instances.Game;
 using CardGame.Shared.Models.Cards;
@@ -115,6 +115,25 @@ namespace SampleGame.Tests
 
             var card = (CreatureCard)game.CurrentPlayer.Hand[0];
             Assert.Throws<Exception>(() => game.PlayCreatureFromHand(game.Opponent, card));
+        }
+
+        [Fact]
+        public void PlayCreatureFromHand_Effect_Procs()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            // 1) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Play 1 booster
+            game.CurrentPlayer.Hand = new List<Card> { new Booster() };
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+
+            Assert.Single(game.CurrentPlayer.Hand);
         }
         #endregion
 

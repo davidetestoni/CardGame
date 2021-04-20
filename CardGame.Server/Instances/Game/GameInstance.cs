@@ -41,7 +41,7 @@ namespace CardGame.Server.Instances.Game
         /// <summary>
         /// Randomly selects the current player, draws the initial hands and starts the game.
         /// </summary>
-        public void Start()
+        public GameInstance Start()
         {
             CurrentPlayer = Random.Next() % 2 == 0 ? PlayerOne : PlayerTwo;
             CurrentPlayer.MaximumMana = 1;
@@ -50,12 +50,14 @@ namespace CardGame.Server.Instances.Game
             DrawCards(CurrentPlayer, Options.InitialHandSize, DrawEventSource.GameStart);
             DrawCards(CurrentPlayer, 1, DrawEventSource.TurnStart);
             Status = GameStatus.Started;
+
+            return this;
         }
 
         /// <summary>
         /// Plays a creature <paramref name="card"/> from the <paramref name="player"/>'s hand.
         /// </summary>
-        public void PlayCreatureFromHand(PlayerInstance player, CreatureCard card)
+        public GameInstance PlayCreatureFromHand(PlayerInstance player, CreatureCard card)
         {
             CheckTurn(player);
 
@@ -89,12 +91,14 @@ namespace CardGame.Server.Instances.Game
             }
 
             NotifyAll(c => c.OnCreaturePlayed(player, instance));
+
+            return this;
         }
 
         /// <summary>
         /// Ends the <paramref name="player"/>'s turn.
         /// </summary>
-        public void EndTurn(PlayerInstance player)
+        public GameInstance EndTurn(PlayerInstance player)
         {
             CheckTurn(player);
 
@@ -122,9 +126,11 @@ namespace CardGame.Server.Instances.Game
 
             // Proc effects for the turn start
             NotifyAll(c => c.OnTurnStart(CurrentPlayer, TurnNumber));
+
+            return this;
         }
 
-        public void AttackCreature(PlayerInstance player, CreatureCardInstance attacker, CreatureCardInstance target)
+        public GameInstance AttackCreature(PlayerInstance player, CreatureCardInstance attacker, CreatureCardInstance target)
         {
             CheckTurn(player);
 
@@ -157,13 +163,17 @@ namespace CardGame.Server.Instances.Game
             NotifyAll(c => c.OnCardDamaged(target, attacker, recoilDamage));
 
             DestroyZeroHealth();
+
+            NotifyAll(c => c.OnAfterAttack(attacker, target, damage));
+
+            return this;
         }
 
         /// <summary>
         /// Draws <paramref name="count"/> cards from the <paramref name="player"/>'s deck.
         /// </summary>
         /// <param name="drawEventSource">The cause of the draw</param>
-        public void DrawCards(PlayerInstance player, int count, DrawEventSource drawEventSource = DrawEventSource.Effect)
+        public GameInstance DrawCards(PlayerInstance player, int count, DrawEventSource drawEventSource = DrawEventSource.Effect)
         {
             if (drawEventSource != DrawEventSource.GameStart)
             {
@@ -177,7 +187,7 @@ namespace CardGame.Server.Instances.Game
                 if (player.Deck.Count == 0)
                 {
                     DamagePlayer(player, 1);
-                    return;
+                    return this;
                 }
                 else
                 {
@@ -201,22 +211,40 @@ namespace CardGame.Server.Instances.Game
             }
 
             NotifyAll(c => c.OnCardsDrawn(player, count, drawEventSource));
+
+            return this;
         }
 
         /// <summary>
         /// Destroys a card on the field and sends it to the graveyard.
         /// </summary>
-        public void DestroyCard(CardInstance destroyer, CreatureCardInstance target)
+        public GameInstance DestroyCard(CardInstance destroyer, CreatureCardInstance target)
         {
-            NotifyAll(c => c.OnCardDestroyed(destroyer, target));
             target.Owner.Field.Remove(target);
             target.Owner.Graveyard.Add(target.Base);
+
+            NotifyAll(c => c.OnCardDestroyed(destroyer, target));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Restores health to the target, capped at the maximum health value.
+        /// </summary>
+        public GameInstance RestoreCreatureHealth(CreatureCardInstance target, int amount)
+        {
+            var healAmount = Math.Min(target.Base.Health - target.Health, amount);
+            target.Health += healAmount;
+
+            NotifyAll(c => c.OnCreatureHealed(target, healAmount));
+
+            return this;
         }
 
         /// <summary>
         /// Damage the player due to an effect (not for direct attacks).
         /// </summary>
-        public void DamagePlayer(PlayerInstance target, int damage)
+        public GameInstance DamagePlayer(PlayerInstance target, int damage)
         {
             if (target.CurrentHealth > damage)
             {
@@ -227,12 +255,14 @@ namespace CardGame.Server.Instances.Game
                 target.CurrentHealth = 0;
                 CheckVictory();
             }
+
+            return this;
         }
 
         /// <summary>
         /// Destroy the cards with zero health.
         /// </summary>
-        public void DestroyZeroHealth()
+        public GameInstance DestroyZeroHealth()
         {
             for (int i = 0; i < CurrentPlayer.Field.Count; i++)
             {
@@ -257,12 +287,14 @@ namespace CardGame.Server.Instances.Game
                     i--;
                 }
             }
+
+            return this;
         }
 
         /// <summary>
         /// Checks the victory condition and possibly ends the game.
         /// </summary>
-        public void CheckVictory()
+        public GameInstance CheckVictory()
         {
             // If both players's health drops to 0 at the same time, the player that is currently
             // playing will lose.
@@ -276,6 +308,8 @@ namespace CardGame.Server.Instances.Game
                 Status = GameStatus.Finished;
                 Winner = CurrentPlayer;
             }
+
+            return this;
         }
         #endregion
 

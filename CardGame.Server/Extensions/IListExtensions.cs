@@ -17,5 +17,8 @@ namespace CardGame.Server.Extensions
                 list[n] = value;
             }
         }
+
+        public static T GetRandom<T>(this IList<T> list, Random rng)
+            => list[rng.Next(0, list.Count)];
     }
 }

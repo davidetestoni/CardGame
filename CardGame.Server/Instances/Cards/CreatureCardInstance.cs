@@ -137,6 +137,13 @@ namespace CardGame.Server.Models.Cards.Instances
         /// <param name="player">The player that placed the card</param>
         /// <param name="newCard">The card that just joined the field</param>
         public virtual void OnCreaturePlayed(PlayerInstance player, CreatureCardInstance newCard) { }
+
+        /// <summary>
+        /// Called when a card is healed by an effect.
+        /// </summary>
+        /// <param name="target">The card that was healed</param>
+        /// <param name="amount">The amount of health received</param>
+        public virtual void OnCreatureHealed(CreatureCardInstance target, int amount) { }
         #endregion
     }
 }

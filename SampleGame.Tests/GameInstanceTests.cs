@@ -1,9 +1,8 @@
 ﻿using CardGame.Server.Enums;
-using CardGame.Server.Factories;
 using CardGame.Server.Instances.Game;
 using CardGame.Shared.Models.Cards;
-using CardGame.Shared.Models.Players;
 using SampleGame.Cards.Creatures;
+using SampleGame.Tests.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,20 +10,6 @@ using Xunit;
 
 namespace SampleGame.Tests
 {
-    public class FactoryFixture
-    {
-        public CardInstanceFactory CardFactory { get; private set; }
-        public PlayerInstanceFactory PlayerFactory { get; private set; }
-        public GameInstanceFactory GameFactory { get; private set; }
-
-        public FactoryFixture()
-        {
-            CardFactory = new(typeof(BasicSoldier).Assembly);
-            PlayerFactory = new();
-            GameFactory = new(CardFactory, PlayerFactory);
-        }
-    }
-
     public class GameInstanceTests : IClassFixture<FactoryFixture>
     {
         private readonly FactoryFixture _factoryFixture;
@@ -38,7 +23,7 @@ namespace SampleGame.Tests
         [Fact]
         public void Start_StandardSettings_GameStarted()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             Assert.Equal(GameStatus.Created, game.Status);
 
             game.Start();
@@ -56,7 +41,7 @@ namespace SampleGame.Tests
         [Fact]
         public void Start_StandardSettings_HandsDrawn()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             var player1DeckSize = game.PlayerOne.Deck.Count;
             var player2DeckSize = game.PlayerTwo.Deck.Count;
 
@@ -82,7 +67,7 @@ namespace SampleGame.Tests
         [Fact]
         public void PlayCreatureFromHand_EnoughMana_Summon()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             game.Start();
 
             var handSize = game.CurrentPlayer.Hand.Count;
@@ -97,7 +82,7 @@ namespace SampleGame.Tests
         [Fact]
         public void PlayCreatureFromHand_NotEnoughMana_Throws()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             game.Start();
 
             var card1 = (CreatureCard)game.CurrentPlayer.Hand[0];
@@ -110,30 +95,11 @@ namespace SampleGame.Tests
         [Fact]
         public void PlayCreatureFromHand_WrongPlayer_Throws()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             game.Start();
 
             var card = (CreatureCard)game.CurrentPlayer.Hand[0];
             Assert.Throws<Exception>(() => game.PlayCreatureFromHand(game.Opponent, card));
-        }
-
-        [Fact]
-        public void PlayCreatureFromHand_Effect_Procs()
-        {
-            var game = CreateTestGame();
-            game.Start();
-
-            // 1) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Play 1 booster
-            game.CurrentPlayer.Hand = new List<Card> { new Booster() };
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-
-            Assert.Single(game.CurrentPlayer.Hand);
         }
         #endregion
 
@@ -141,7 +107,7 @@ namespace SampleGame.Tests
         [Fact]
         public void EndTurn_InTime_ChangePlayer()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             game.Start();
 
             var opponent = game.Opponent;
@@ -159,7 +125,7 @@ namespace SampleGame.Tests
         [Fact]
         public void EndTurn_WrongPlayer_Throws()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             game.Start();
 
             Assert.Throws<Exception>(() => game.EndTurn(game.Opponent));
@@ -170,7 +136,7 @@ namespace SampleGame.Tests
         [Fact]
         public void DrawCards_Effect_Draws()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             game.Start();
 
             var handSize = game.CurrentPlayer.Hand.Count;
@@ -181,7 +147,7 @@ namespace SampleGame.Tests
         [Fact]
         public void DrawCards_Multiple_Draws()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             game.Start();
 
             var handSize = game.CurrentPlayer.Hand.Count;
@@ -192,7 +158,7 @@ namespace SampleGame.Tests
         [Fact]
         public void DrawCards_HandFull_DestroysExtras()
         {
-            var game = CreateTestGame();
+            var game = _factoryFixture.CreateTestGame();
             game.Start();
 
             var handRoom = game.Options.MaximumHandSize - game.CurrentPlayer.Hand.Count;
@@ -204,7 +170,7 @@ namespace SampleGame.Tests
         [Fact]
         public void DrawCards_DeckEmpty_DamagePlayer()
         {
-            var game = CreateTestGame(6);
+            var game = _factoryFixture.CreateTestGame(6);
             game.Start();
 
             game.DrawCards(game.CurrentPlayer, game.CurrentPlayer.Deck.Count + 1, DrawEventSource.Effect);
@@ -216,18 +182,13 @@ namespace SampleGame.Tests
         [Fact]
         public void AttackCreature_SoldierSoldier_BothDestroyed()
         {
-            var game = CreateTestGame();
-            game.Start();
+            var game = 
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields(new BasicSoldier(), new BasicSoldier())
+                .ResetAttacksLeft();
 
-            // 1) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Attack the opponent's basic soldier
+            // Attack the opponent's basic soldier
             game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], game.Opponent.Field[0]);
 
             Assert.Empty(game.CurrentPlayer.Field);
@@ -239,28 +200,16 @@ namespace SampleGame.Tests
         [Fact]
         public void AttackCreature_SoldierGunner_SoldierDestroyedGunnerDamaged()
         {
-            var game = CreateTestGame();
-            game.Start();
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields(new BasicSoldier(), new Gunner())
+                .ResetAttacksLeft();
 
-            game.Opponent.Hand = new List<Card> { new Gunner() };
-            
-            // 1) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Play 1 gunner and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Attack the gunner with the soldier
-            var gunner = game.Opponent.Field[0];
-            game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], gunner);
+            // Attack the gunner with the soldier
+            var soldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
+            var gunner = game.Opponent.GetCreatureOnField<Gunner>();
+            game.AttackCreature(game.CurrentPlayer, soldier, gunner);
 
             Assert.Empty(game.CurrentPlayer.Field);
             Assert.Single(game.Opponent.Field);
@@ -273,28 +222,16 @@ namespace SampleGame.Tests
         [Fact]
         public void AttackCreature_GunnerSoldier_GunnerDamagedSoldierDestroyed()
         {
-            var game = CreateTestGame();
-            game.Start();
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields(new Gunner(), new BasicSoldier())
+                .ResetAttacksLeft();
 
-            game.CurrentPlayer.Hand = new List<Card> { new Gunner() };
-
-            // 1) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Play 1 gunner and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Attack the soldier with the gunner
-            var gunner = game.CurrentPlayer.Field[0];
-            game.AttackCreature(game.CurrentPlayer, gunner, game.Opponent.Field[0]);
+            // Attack the soldier with the gunner
+            var gunner = game.CurrentPlayer.GetCreatureOnField<Gunner>();
+            var soldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
+            game.AttackCreature(game.CurrentPlayer, gunner, soldier);
 
             Assert.Single(game.CurrentPlayer.Field);
             Assert.Empty(game.Opponent.Field);
@@ -308,208 +245,102 @@ namespace SampleGame.Tests
         [Fact]
         public void AttackCreature_NoAttacksLeft_Throws()
         {
-            var game = CreateTestGame();
-            game.Start();
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields(new BasicSoldier(), new BasicSoldier());
 
-            // 1) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Play 1 basic soldier and try to attack
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            // Try to attack the enemy soldier
+            var mySoldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
+            var enemySoldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
             Assert.Throws<Exception>(() =>
-                game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], game.Opponent.Field[0]));
+                game.AttackCreature(game.CurrentPlayer, mySoldier, enemySoldier));
         }
 
         [Fact]
+        public void AttackCreature_OwnField_Throws()
+        {
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields(new List<Card> { new BasicSoldier(), new Gunner() })
+                .ResetAttacksLeft();
+
+            // Try to attack the gunner with the soldier
+            var soldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
+            var gunner = game.CurrentPlayer.GetCreatureOnField<Gunner>();
+            Assert.Throws<Exception>(() =>
+                game.AttackCreature(game.CurrentPlayer, soldier, gunner));
+        }
+        #endregion
+
+        // ----------
+        //  FEATURES
+        // ----------
+
+        #region Taunt
+        [Fact]
         public void AttackCreature_Taunt_AttackOther_Throws()
         {
-            var game = CreateTestGame();
-            game.Start();
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields(new BasicSoldier(), new List<Card> { new Defender(), new BasicSoldier() })
+                .ResetAttacksLeft();
 
-            // 1) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Play a defender
-            game.CurrentPlayer.Hand = new List<Card> { new Defender() };
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Try to attack the soldier
-            var soldier = game.Opponent.Field.First(c => c.Base is BasicSoldier);
+            // Try to attack the soldier
+            var mySoldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
+            var enemySoldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
             Assert.Throws<Exception>(() =>
-                game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], soldier));
+                game.AttackCreature(game.CurrentPlayer, mySoldier, enemySoldier));
         }
 
         [Fact]
         public void AttackCreature_Taunt_AttackTaunter_Ok()
         {
-            var game = CreateTestGame();
-            game.Start();
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields(new BasicSoldier(), new List<Card> { new Defender(), new BasicSoldier() })
+                .ResetAttacksLeft();
 
-            // 1) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Play a defender
-            game.CurrentPlayer.Hand = new List<Card> { new Defender() };
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Attack the defender
-            var defender = game.Opponent.Field.First(c => c.Base is Defender);
-            game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], defender);
+            // Attack the defender
+            var mySoldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
+            var defender = game.Opponent.GetCreatureOnField<Defender>();
+            game.AttackCreature(game.CurrentPlayer, mySoldier, defender);
 
             Assert.Empty(game.CurrentPlayer.Field);
             Assert.Equal(2, game.Opponent.Field.Count);
 
             Assert.Equal(defender.Base.Health - 1, defender.Health);
         }
+        #endregion
 
-        [Fact]
-        public void AttackCreature_OwnField_Throws()
-        {
-            var game = CreateTestGame();
-            game.Start();
-
-            // 1) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Play a gunner and try to attack the gunner with the soldier
-            game.CurrentPlayer.Hand = new List<Card> { new Gunner() };
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            var soldier = game.CurrentPlayer.Field.First(c => c.Base is BasicSoldier);
-            var gunner = game.CurrentPlayer.Field.First(c => c.Base is Gunner);
-            Assert.Throws<Exception>(() =>
-                game.AttackCreature(game.CurrentPlayer, soldier, gunner));
-        }
-
+        #region Rush
         [Fact]
         public void AttackCreature_Rush_AttackImmediately()
         {
-            var game = CreateTestGame();
-            game.Start();
+            var game = 
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetMana(2, 2)
+                .SetHands(new Quickshot())
+                .SetFields(null, new BasicSoldier());
 
-            // 1) End turn
-            game.EndTurn(game.CurrentPlayer);
+            // Play the quickshot
+            var quickshotCard = game.CurrentPlayer.GetCreatureInHand<Quickshot>();
+            game.PlayCreatureFromHand(game.CurrentPlayer, quickshotCard);
 
-            // 2) Play 1 basic soldier and end the turn
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Play 1 quickshot and attack immediately
-            game.CurrentPlayer.Hand = new List<Card> { new Quickshot() };
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], game.Opponent.Field[0]);
+            // Attack immediately
+            var quickshot = game.CurrentPlayer.GetCreatureOnField<Quickshot>();
+            var soldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
+            game.AttackCreature(game.CurrentPlayer, quickshot, soldier);
 
             Assert.Empty(game.CurrentPlayer.Field);
             Assert.Empty(game.Opponent.Field);
             Assert.Single(game.CurrentPlayer.Graveyard);
             Assert.Single(game.Opponent.Graveyard);
         }
-
-        [Fact]
-        public void AttackCreature_AttackerEffect_Proc()
-        {
-            var game = CreateTestGame();
-            game.Start();
-
-            // 1) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) End the turn
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Play 1 booster
-            game.CurrentPlayer.Hand = new List<Card> { new Attacker() };
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 2) Play 1 gunner and end the turn
-            game.CurrentPlayer.Hand = new List<Card> { new Gunner() };
-            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
-            game.EndTurn(game.CurrentPlayer);
-
-            // 1) Attack the gunner with the attacker
-            var attacker = game.CurrentPlayer.Field.First(c => c.Base is Attacker);
-            var gunner = game.Opponent.Field.First(c => c.Base is Gunner);
-            game.AttackCreature(game.CurrentPlayer, attacker, gunner);
-
-            Assert.Equal(1, gunner.Health);
-            Assert.Equal(1, attacker.Health);
-        }
-        #endregion
-
-        #region Helpers
-        // Creates a test game with 2 players with test decks of 10 basic soldiers
-        private GameInstance CreateTestGame(int deckSize = 20)
-        {
-            var options = new GameInstanceOptions();
-            var playerOne = CreateTestPlayer("Player 1", deckSize);
-            var playerTwo = CreateTestPlayer("Player 2", deckSize);
-
-            return _factoryFixture.GameFactory.Create(options, playerOne, playerTwo);
-        }
-
-        // Creates a test player with a deck made only of basic soldiers
-        // Use this to test basic mechanics of the game
-        private Player CreateTestPlayer(string name, int deckSize)
-            => new()
-            {
-                Name = name,
-                Deck = new List<(Card, int)>
-                {
-                    (new BasicSoldier(), deckSize)
-                }
-            };
-
-        // Creates a sample game with 2 players with sample decks
-        private GameInstance CreateSampleGame()
-        {
-            var options = new GameInstanceOptions();
-            var playerOne = CreateSamplePlayer("Player 1");
-            var playerTwo = CreateSamplePlayer("Player 2");
-
-            return _factoryFixture.GameFactory.Create(options, playerOne, playerTwo);
-        }
-
-        // Creates a sample player with a working deck
-        private Player CreateSamplePlayer(string name)
-            => new()
-            {
-                Name = name,
-                Deck = new List<(Card, int)>
-                {
-                    (new BasicSoldier(), 4),
-                    (new Gunner(), 3),
-                    (new Defender(), 3)
-                }
-            };
         #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CardGame.Server.Enums;
 using CardGame.Server.Instances.Players;
 using CardGame.Shared.Enums;
+using CardGame.Shared.Models.Cards;
 
 namespace CardGame.Server.Models.Cards.Instances
 {
@@ -13,6 +14,11 @@ namespace CardGame.Server.Models.Cards.Instances
         // the course of the game.
 
         #region Properties
+        /// <summary>
+        /// This is the original card from which the instance was created.
+        /// </summary>
+        public CreatureCard Base { get; set; }
+
         /// <summary>
         /// The current value of the attack of this card.
         /// </summary>
@@ -50,7 +56,10 @@ namespace CardGame.Server.Models.Cards.Instances
         /// <summary>
         /// Resets <see cref="AttacksLeft"/> for the current turn.
         /// </summary>
-        public virtual void ResetAttacksLeft() { }
+        public virtual void ResetAttacksLeft()
+        {
+            AttacksLeft = 1;
+        }
 
         /// <summary>
         /// Called when a card is damaged by another card (spell or creature).
@@ -65,16 +74,14 @@ namespace CardGame.Server.Models.Cards.Instances
                 if (Health > damage)
                 {
                     Health -= damage;
-                    // TODO: Notify client about damage
                 }
                 else
                 {
                     Health = 0;
-
-                    // TODO: Notify client about damage
-                    // TODO: Notify client about destruction
                 }
             }
+
+            // TODO: Notify client about damage
         }
 
         /// <summary>

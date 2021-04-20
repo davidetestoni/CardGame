@@ -55,7 +55,6 @@ namespace CardGame.Server.Factories
 
             instance.Game = game;
             instance.Owner = owner;
-            instance.Base = card;
             instance.Id = Guid.NewGuid();
             instance.ManaCost = card.ManaCost;
 
@@ -67,6 +66,7 @@ namespace CardGame.Server.Factories
             var type = _cards[card];
             var instance = (CreatureCardInstance)Activator.CreateInstance(type);
 
+            instance.Base = card;
             instance.Attack = card.Attack;
             instance.Health = card.Health;
             instance.Features = CardFeature.None;

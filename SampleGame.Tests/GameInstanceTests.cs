@@ -6,6 +6,7 @@ using CardGame.Shared.Models.Players;
 using SampleGame.Cards.Creatures;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace SampleGame.Tests
@@ -189,6 +190,228 @@ namespace SampleGame.Tests
 
             game.DrawCards(game.CurrentPlayer, game.CurrentPlayer.Deck.Count + 1, DrawEventSource.Effect);
             Assert.Equal(game.CurrentPlayer.InitialHealth - 1, game.CurrentPlayer.CurrentHealth);
+        }
+        #endregion
+
+        #region AttackCreature
+        [Fact]
+        public void AttackCreature_SoldierSoldier_BothDestroyed()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            // 1) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Attack the opponent's basic soldier
+            game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], game.Opponent.Field[0]);
+
+            Assert.Empty(game.CurrentPlayer.Field);
+            Assert.Empty(game.Opponent.Field);
+            Assert.Single(game.CurrentPlayer.Graveyard);
+            Assert.Single(game.Opponent.Graveyard);
+        }
+
+        [Fact]
+        public void AttackCreature_SoldierGunner_SoldierDestroyedGunnerDamaged()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            game.Opponent.Hand = new List<Card> { new Gunner() };
+            
+            // 1) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Play 1 gunner and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Attack the gunner with the soldier
+            var gunner = game.Opponent.Field[0];
+            game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], gunner);
+
+            Assert.Empty(game.CurrentPlayer.Field);
+            Assert.Single(game.Opponent.Field);
+            Assert.Single(game.CurrentPlayer.Graveyard);
+            Assert.Empty(game.Opponent.Graveyard);
+
+            Assert.Equal(gunner.Base.Health - 1, gunner.Health);
+        }
+
+        [Fact]
+        public void AttackCreature_GunnerSoldier_GunnerDamagedSoldierDestroyed()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            game.CurrentPlayer.Hand = new List<Card> { new Gunner() };
+
+            // 1) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Play 1 gunner and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Attack the soldier with the gunner
+            var gunner = game.CurrentPlayer.Field[0];
+            game.AttackCreature(game.CurrentPlayer, gunner, game.Opponent.Field[0]);
+
+            Assert.Single(game.CurrentPlayer.Field);
+            Assert.Empty(game.Opponent.Field);
+            Assert.Empty(game.CurrentPlayer.Graveyard);
+            Assert.Single(game.Opponent.Graveyard);
+
+            Assert.Equal(gunner.Base.Health - 1, gunner.Health);
+            Assert.Equal(0, gunner.AttacksLeft);
+        }
+
+        [Fact]
+        public void AttackCreature_NoAttacksLeft_Throws()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            // 1) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Play 1 basic soldier and try to attack
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            Assert.Throws<Exception>(() =>
+                game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], game.Opponent.Field[0]));
+        }
+
+        [Fact]
+        public void AttackCreature_Taunt_AttackOther_Throws()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            // 1) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Play a defender
+            game.CurrentPlayer.Hand = new List<Card> { new Defender() };
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Try to attack the soldier
+            var defender = game.Opponent.Field.First(c => c.Base is Defender);
+            Assert.Throws<Exception>(() =>
+                game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], defender));
+        }
+
+        [Fact]
+        public void AttackCreature_Taunt_AttackTaunter_Ok()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            // 1) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Play a defender
+            game.CurrentPlayer.Hand = new List<Card> { new Defender() };
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Attack the defender
+            var defender = game.Opponent.Field.First(c => c.Base is Defender);
+            game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], defender);
+
+            Assert.Empty(game.CurrentPlayer.Field);
+            Assert.Equal(2, game.Opponent.Field.Count);
+
+            Assert.Equal(defender.Base.Health - 1, defender.Health);
+        }
+
+        [Fact]
+        public void AttackCreature_OwnField_Throws()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            // 1) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Play a gunner and try to attack the gunner with the soldier
+            game.CurrentPlayer.Hand = new List<Card> { new Gunner() };
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            var soldier = game.CurrentPlayer.Field.First(c => c.Base is BasicSoldier);
+            var gunner = game.CurrentPlayer.Field.First(c => c.Base is Gunner);
+            Assert.Throws<Exception>(() =>
+                game.AttackCreature(game.CurrentPlayer, soldier, gunner));
+        }
+
+        [Fact]
+        public void AttackCreature_Rush_AttackImmediately()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            // 1) End turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Play 1 basic soldier and end the turn
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Play 1 quickshot and attack immediately
+            game.CurrentPlayer.Hand = new List<Card> { new Quickshot() };
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], game.Opponent.Field[0]);
+
+            Assert.Empty(game.CurrentPlayer.Field);
+            Assert.Empty(game.Opponent.Field);
+            Assert.Single(game.CurrentPlayer.Graveyard);
+            Assert.Single(game.Opponent.Graveyard);
         }
         #endregion
 

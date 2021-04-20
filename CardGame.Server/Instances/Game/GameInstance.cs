@@ -88,7 +88,7 @@ namespace CardGame.Server.Instances.Game
                 instance.ResetAttacksLeft();
             }
 
-            NotifyAllExceptSelf(instance, c => c.OnCreaturePlayed(player, instance));
+            NotifyAll(c => c.OnCreaturePlayed(player, instance));
         }
 
         /// <summary>
@@ -134,6 +134,12 @@ namespace CardGame.Server.Instances.Game
                 throw new Exception("This card cannot attack anymore during this turn");
             }
 
+            // If the target has the same owner
+            if (attacker.Owner == target.Owner)
+            {
+                throw new Exception("The attacker and the target belong to the same player");
+            }
+
             // If there's a card with taunt but I'm not attacking a card with taunt
             if (Opponent.Field.Any(c => c.Features.HasFlag(CardFeature.Taunt)) && !target.Features.HasFlag(CardFeature.Taunt))
             {
@@ -149,6 +155,8 @@ namespace CardGame.Server.Instances.Game
 
             NotifyAll(c => c.OnCardDamaged(attacker, target, damage));
             NotifyAll(c => c.OnCardDamaged(target, attacker, recoilDamage));
+
+            DestroyZeroHealth();
         }
 
         /// <summary>
@@ -218,6 +226,36 @@ namespace CardGame.Server.Instances.Game
             {
                 target.CurrentHealth = 0;
                 CheckVictory();
+            }
+        }
+
+        /// <summary>
+        /// Destroy the cards with zero health.
+        /// </summary>
+        public void DestroyZeroHealth()
+        {
+            for (int i = 0; i < CurrentPlayer.Field.Count; i++)
+            {
+                var card = CurrentPlayer.Field[i];
+
+                if (card.Health == 0)
+                {
+                    card.Owner.Field.Remove(card);
+                    card.Owner.Graveyard.Add(card.Base);
+                    i--;
+                }
+            }
+
+            for (int i = 0; i < Opponent.Field.Count; i++)
+            {
+                var card = Opponent.Field[i];
+
+                if (card.Health == 0)
+                {
+                    card.Owner.Field.Remove(card);
+                    card.Owner.Graveyard.Add(card.Base);
+                    i--;
+                }
             }
         }
 

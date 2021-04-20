@@ -22,11 +22,6 @@ namespace CardGame.Server.Models.Cards.Instances
         public PlayerInstance Owner { get; set; }
 
         /// <summary>
-        /// This is the original card from which the instance was created.
-        /// </summary>
-        public Card Base { get; set; }
-
-        /// <summary>
         /// The unique id of this card instance.
         /// </summary>
         public Guid Id { get; set; }

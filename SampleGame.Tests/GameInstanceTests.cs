@@ -1,4 +1,4 @@
-﻿using CardGame.Server.Enums;
+using CardGame.Server.Enums;
 using CardGame.Server.Factories;
 using CardGame.Server.Instances.Game;
 using CardGame.Shared.Models.Cards;
@@ -328,9 +328,9 @@ namespace SampleGame.Tests
             game.EndTurn(game.CurrentPlayer);
 
             // 2) Try to attack the soldier
-            var defender = game.Opponent.Field.First(c => c.Base is Defender);
+            var soldier = game.Opponent.Field.First(c => c.Base is BasicSoldier);
             Assert.Throws<Exception>(() =>
-                game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], defender));
+                game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], soldier));
         }
 
         [Fact]

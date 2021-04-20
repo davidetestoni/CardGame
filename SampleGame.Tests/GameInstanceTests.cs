@@ -432,6 +432,37 @@ namespace SampleGame.Tests
             Assert.Single(game.CurrentPlayer.Graveyard);
             Assert.Single(game.Opponent.Graveyard);
         }
+
+        [Fact]
+        public void AttackCreature_AttackerEffect_Proc()
+        {
+            var game = CreateTestGame();
+            game.Start();
+
+            // 1) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) End the turn
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Play 1 booster
+            game.CurrentPlayer.Hand = new List<Card> { new Attacker() };
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 2) Play 1 gunner and end the turn
+            game.CurrentPlayer.Hand = new List<Card> { new Gunner() };
+            game.PlayCreatureFromHand(game.CurrentPlayer, game.CurrentPlayer.Hand[0] as CreatureCard);
+            game.EndTurn(game.CurrentPlayer);
+
+            // 1) Attack the gunner with the attacker
+            var attacker = game.CurrentPlayer.Field.First(c => c.Base is Attacker);
+            var gunner = game.Opponent.Field.First(c => c.Base is Gunner);
+            game.AttackCreature(game.CurrentPlayer, attacker, gunner);
+
+            Assert.Equal(1, gunner.Health);
+            Assert.Equal(1, attacker.Health);
+        }
         #endregion
 
         #region Helpers

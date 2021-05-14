@@ -6,12 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiteNetLib" Version="0.9.4" />
     <PackageReference Include="Spectre.Console" Version="0.39.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CardGame.Server\CardGame.Server.csproj" />
+    <ProjectReference Include="..\SampleGame\SampleGame.csproj" />
   </ItemGroup>
 
 </Project>

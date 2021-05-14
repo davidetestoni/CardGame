@@ -1,4 +1,5 @@
-﻿using CardGame.Shared.Messages.Client;
+﻿using CardGame.Server.Networking;
+using CardGame.Shared.Messages.Client;
 using Newtonsoft.Json;
 using System;
 
@@ -9,10 +10,10 @@ namespace CardGame.Server.Handlers
         private readonly JsonSerializerSettings jsonSettings =
             new() { TypeNameHandling = TypeNameHandling.Auto };
 
-        public event EventHandler<string> InvalidMessageReceived;
+        public event EventHandler<ClientMessageWrapper> InvalidMessageReceived;
         public event EventHandler<ClientMessage> MessageReceived;
 
-        public void Handle(string str)
+        public void Handle(string str, Guid senderId)
         {
             // Try to deserialize the message
             ClientMessage message;
@@ -20,11 +21,12 @@ namespace CardGame.Server.Handlers
             try
             {
                 message = JsonConvert.DeserializeObject<ClientMessage>(str, jsonSettings);
+                message.PlayerId = senderId;
                 MessageReceived?.Invoke(this, message);
             }
             catch
             {
-                InvalidMessageReceived?.Invoke(this, str);
+                InvalidMessageReceived?.Invoke(this, new(str, senderId));
                 return;
             }
         }

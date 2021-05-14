@@ -1,5 +1,4 @@
 ﻿using CardGame.Server.Handlers;
-using CardGame.Shared.Messages;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
@@ -12,17 +11,19 @@ namespace CardGame.Server.Networking
 {
     public class GameServer
     {
-        private ClientMessageHandler clientMessageHandler;
+        private readonly ClientMessageHandler clientMessageHandler;
         private EventBasedNetListener listener;
         private NetManager server;
         private BackgroundWorker worker;
         private readonly Random rand = new();
 
+        private readonly Dictionary<NetPeer, Guid> peerIds = new();
+
         public string Key { get; private set; }
         public List<NetPeer> ConnectedClients => server.ConnectedPeerList;
         
-        public event EventHandler<NetPeer> ClientConnected;
-        public event EventHandler<string> MessageReceived;
+        public event EventHandler<Guid> ClientConnected;
+        public event EventHandler<ClientMessageWrapper> MessageReceived;
 
         public GameServer(ClientMessageHandler clientMessageHandler)
         {
@@ -42,7 +43,7 @@ namespace CardGame.Server.Networking
         {
             listener = new();
             server = new(listener);
-            server.Start(port);
+            server.Start("127.0.0.1", "::1", port);
 
             Key = RandomString(8);
 
@@ -62,7 +63,9 @@ namespace CardGame.Server.Networking
 
             listener.PeerConnectedEvent += peer =>
             {
-                ClientConnected?.Invoke(this, peer);
+                var id = Guid.NewGuid();
+                peerIds[peer] = id;
+                ClientConnected?.Invoke(this, id);
                 
                 // Send hello to the peer in a reliable way
                 NetDataWriter writer = new();
@@ -74,7 +77,8 @@ namespace CardGame.Server.Networking
             {
                 // Get a string with maximum 10000 characters
                 var message = reader.GetString(10000);
-                clientMessageHandler.Handle(message);
+                MessageReceived?.Invoke(this, new(message, peerIds[peer]));
+                clientMessageHandler.Handle(message, peerIds[peer]);
                 reader.Recycle();
             };
 
@@ -83,6 +87,7 @@ namespace CardGame.Server.Networking
                 WorkerSupportsCancellation = true
             };
             worker.DoWork += Worker_DoWork;
+            worker.RunWorkerAsync();
 
             return this;
         }

@@ -11,24 +11,29 @@ namespace CardGame.Client.Networking
         private NetManager client;
         private BackgroundWorker worker;
 
+        public event EventHandler<string> MessageReceived;
+
         public GameClient Connect(string host, int port, string key)
         {
             listener = new();
-            client = new(listener);
-            client.Start();
-            client.Connect(host, port, key);
 
             listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod) =>
             {
-                Console.WriteLine("We got: {0}", dataReader.GetString(10000 /* max length of string */));
+                var message = dataReader.GetString(10000);
+                MessageReceived?.Invoke(this, message);
                 dataReader.Recycle();
             };
+
+            client = new(listener);
+            client.Start();
+            client.Connect(host, port, key);
 
             worker = new BackgroundWorker
             {
                 WorkerSupportsCancellation = true
             };
             worker.DoWork += Worker_DoWork;
+            worker.RunWorkerAsync();
 
             return this;
         }

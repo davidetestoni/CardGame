@@ -1,8 +1,7 @@
-﻿using LiteNetLib;
-using Spectre.Console;
+﻿using Spectre.Console;
 using System;
 
-namespace CardGame.Server.Instance.Logging
+namespace SampleGame.Server.Logging
 {
     public static class Log
     {
@@ -21,12 +20,12 @@ namespace CardGame.Server.Instance.Logging
         public static void Exception(Exception ex)
             => AnsiConsole.WriteException(ex);
 
-        public static void ClientMessage(string message, NetPeer client)
+        public static void ClientMessage(string message, Guid client)
             => AnsiConsole.MarkupLine("[turquoise2][[{0}]] [[{1} -> Server]] {2}[/]",
-                DateTime.Now, client.EndPoint, message);
+                DateTime.Now, client, message);
 
-        public static void ServerMessage(string message, NetPeer client)
+        public static void ServerMessage(string message, Guid client)
            => AnsiConsole.MarkupLine("[darkolivegreen2][[{0}]] [[Server -> {1}]] {2}[/]",
-                DateTime.Now, client.EndPoint, message);
+                DateTime.Now, client, message);
     }
 }

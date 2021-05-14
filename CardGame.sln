@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleGame", "SampleGame\Sa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleGame.Tests", "SampleGame.Tests\SampleGame.Tests.csproj", "{9908608E-770D-400C-936B-941A6B1B48AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame.Server.Instance", "CardGame.Server.Instance\CardGame.Server.Instance.csproj", "{A130AC87-25D1-435F-9DC9-AC4CFE7CA503}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleGame.Server", "SampleGame.Server\SampleGame.Server.csproj", "{A130AC87-25D1-435F-9DC9-AC4CFE7CA503}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

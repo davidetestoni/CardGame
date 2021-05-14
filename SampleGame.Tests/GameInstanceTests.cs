@@ -185,7 +185,7 @@ namespace SampleGame.Tests
             var game = 
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new BasicSoldier(), new BasicSoldier())
+                .SetFields1v1(new BasicSoldier(), new BasicSoldier())
                 .ResetAttacksLeft();
 
             // Attack the opponent's basic soldier
@@ -203,7 +203,7 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new BasicSoldier(), new Gunner())
+                .SetFields1v1(new BasicSoldier(), new Gunner())
                 .ResetAttacksLeft();
 
             // Attack the gunner with the soldier
@@ -225,7 +225,7 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new Gunner(), new BasicSoldier())
+                .SetFields1v1(new Gunner(), new BasicSoldier())
                 .ResetAttacksLeft();
 
             // Attack the soldier with the gunner
@@ -248,7 +248,7 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new BasicSoldier(), new BasicSoldier());
+                .SetFields1v1(new BasicSoldier(), new BasicSoldier());
 
             // Try to attack the enemy soldier
             var mySoldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
@@ -274,6 +274,98 @@ namespace SampleGame.Tests
         }
         #endregion
 
+        #region AttackPlayer
+        [Fact]
+        public void AttackPlayer_Soldier_DealsDamage()
+        {
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields1v1(new BasicSoldier(), null)
+                .ResetAttacksLeft();
+
+            // Attack the opponent
+            var soldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
+            game.AttackPlayer(game.CurrentPlayer, soldier, game.Opponent);
+
+            Assert.Equal(game.Opponent.InitialHealth - soldier.Attack, game.Opponent.CurrentHealth);
+            Assert.Equal(0, soldier.AttacksLeft);
+            Assert.Equal(soldier.Base.Health, soldier.Health);
+        }
+        #endregion
+
+        #region RestoreCreatureHealth
+        [Fact]
+        public void RestoreCreatureHealth_LessThanFull_RestoreAmount()
+        {
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields1v1(new Gunner());
+
+            var gunner = game.CurrentPlayer.GetCreatureOnField<Gunner>();
+            gunner.Health = 1;
+            game.RestoreCreatureHealth(gunner, 2);
+            Assert.Equal(3, gunner.Health);
+        }
+
+        [Fact]
+        public void RestoreCreatureHealth_MoreThanFull_BringToFull()
+        {
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start()
+                .SetFields1v1(new Gunner());
+
+            var gunner = game.CurrentPlayer.GetCreatureOnField<Gunner>();
+            gunner.Health = 2;
+            game.RestoreCreatureHealth(gunner, 2);
+            Assert.Equal(3, gunner.Health);
+        }
+        #endregion
+
+        #region RestorePlayerHealth
+        [Fact]
+        public void RestorePlayerHealth_LessThanFull_RestoreAmount()
+        {
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start();
+
+            game.CurrentPlayer.CurrentHealth -= 2;
+            game.RestorePlayerHealth(game.CurrentPlayer, 2);
+            Assert.Equal(game.CurrentPlayer.InitialHealth, game.CurrentPlayer.CurrentHealth);
+        }
+
+        [Fact]
+        public void RestorePlayerHealth_MoreThanFull_BringToFull()
+        {
+            var game =
+                _factoryFixture.CreateTestGame()
+                .Start();
+
+            game.CurrentPlayer.CurrentHealth -= 2;
+            game.RestorePlayerHealth(game.CurrentPlayer, 3);
+            Assert.Equal(game.CurrentPlayer.InitialHealth, game.CurrentPlayer.CurrentHealth);
+        }
+        #endregion
+
+        #region Surrender
+        [Fact]
+        public void Surrender_CurrentPlayer_GameEnds()
+        {
+            var game = _factoryFixture.CreateTestGame();
+            game.Start();
+
+            var currentPlayer = game.CurrentPlayer;
+            var opponent = game.Opponent;
+            game.Surrender(currentPlayer);
+
+            Assert.Equal(GameStatus.Finished, game.Status);
+            Assert.Equal(opponent, game.Winner);
+        }
+        #endregion
+
         // ----------
         //  FEATURES
         // ----------
@@ -285,7 +377,7 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new BasicSoldier(), new List<Card> { new Defender(), new BasicSoldier() })
+                .SetFields(new List<Card> { new BasicSoldier() }, new List<Card> { new Defender(), new BasicSoldier() })
                 .ResetAttacksLeft();
 
             // Try to attack the soldier
@@ -301,7 +393,7 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new BasicSoldier(), new List<Card> { new Defender(), new BasicSoldier() })
+                .SetFields1vMany(new BasicSoldier(), new List<Card> { new Defender(), new BasicSoldier() })
                 .ResetAttacksLeft();
 
             // Attack the defender
@@ -325,7 +417,7 @@ namespace SampleGame.Tests
                 .Start()
                 .SetMana(2, 2)
                 .SetHands(new Quickshot())
-                .SetFields(null, new BasicSoldier());
+                .SetFields1v1(null, new BasicSoldier());
 
             // Play the quickshot
             var quickshotCard = game.CurrentPlayer.GetCreatureInHand<Quickshot>();

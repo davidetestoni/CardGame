@@ -48,10 +48,16 @@ namespace CardGame.Server.Models.Cards.Instances
 
         #region Virtual Methods
         /// <summary>
-        /// Called before this card attacks a target. Returns the damage dealt by this card.
+        /// Called before this card attacks another card. Returns the damage dealt by this card.
         /// </summary>
         /// <param name="target">The card that is being attacked</param>
         public virtual int GetAttackDamage(CreatureCardInstance target) => Attack;
+
+        /// <summary>
+        /// Called before this card attacks a player. Returns the damage dealt by this card.
+        /// </summary>
+        /// <param name="target">The player that is being attacked</param>
+        public virtual int GetAttackDamage(PlayerInstance target) => Attack;
 
         /// <summary>
         /// Resets <see cref="AttacksLeft"/> for the current turn.
@@ -85,6 +91,14 @@ namespace CardGame.Server.Models.Cards.Instances
         }
 
         /// <summary>
+        /// Called when a player is damaged by a card.
+        /// </summary>
+        /// <param name="damageSource">The card that damaged the target</param>
+        /// <param name="target">The player that was damaged</param>
+        /// <param name="damage">The amount of damage inflicted (before mitigation)</param>
+        public virtual void OnPlayerDamaged(CardInstance damageSource, PlayerInstance target, int damage) { }        
+
+        /// <summary>
         /// Called when a card is destroyed by another card.
         /// </summary>
         /// <param name="destructionSource">The card that destroyed this card</param>
@@ -95,19 +109,34 @@ namespace CardGame.Server.Models.Cards.Instances
         }
 
         /// <summary>
-        /// Called before an attack is performed.
+        /// Called before an attack is performed against a card.
         /// </summary>
         /// <param name="attacker">The attacking card</param>
         /// <param name="target">The card that is being attacked</param>
         public virtual void OnBeforeAttack(CreatureCardInstance attacker, CreatureCardInstance target) { }
 
         /// <summary>
-        /// Called after an attack has been performed.
+        /// Called before an attack is performed against a player.
+        /// </summary>
+        /// <param name="attacker">The attacking card</param>
+        /// <param name="target">The player that is being attacked</param>
+        public virtual void OnBeforeAttack(CreatureCardInstance attacker, PlayerInstance target) { }
+
+        /// <summary>
+        /// Called after an attack has been performed against a card.
         /// </summary>
         /// <param name="attacker">The attacking card</param>
         /// <param name="target">The card that has been attacked</param>
         /// <param name="damage">The damage dealt to the opponent</param>
         public virtual void OnAfterAttack(CreatureCardInstance attacker, CreatureCardInstance target, int damage) { }
+
+        /// <summary>
+        /// Called after an attack is performed against a player.
+        /// </summary>
+        /// <param name="attacker">The attacking card</param>
+        /// <param name="target">The player that has been attacked</param>
+        /// <param name="damage">The damage dealt to the opponent</param>
+        public virtual void OnAfterAttack(CreatureCardInstance attacker, PlayerInstance target, int damage) { }
 
         /// <summary>
         /// Called at the beginning of a player's turn.
@@ -144,6 +173,13 @@ namespace CardGame.Server.Models.Cards.Instances
         /// <param name="target">The card that was healed</param>
         /// <param name="amount">The amount of health received</param>
         public virtual void OnCreatureHealed(CreatureCardInstance target, int amount) { }
+
+        /// <summary>
+        /// Called when a player is healed by an effect.
+        /// </summary>
+        /// <param name="target">The player that was healed</param>
+        /// <param name="amount">The amount of health received</param>
+        public virtual void OnPlayerHealed(PlayerInstance target, int amount) { }
         #endregion
     }
 }

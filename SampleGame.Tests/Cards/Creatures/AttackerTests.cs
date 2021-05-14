@@ -19,7 +19,7 @@ namespace SampleGame.Tests.Cards.Creatures
             var game = 
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new Attacker(), new Gunner())
+                .SetFields1v1(new Attacker(), new Gunner())
                 .ResetAttacksLeft();
 
             // Attack the gunner with the attacker

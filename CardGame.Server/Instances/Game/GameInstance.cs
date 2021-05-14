@@ -130,6 +130,9 @@ namespace CardGame.Server.Instances.Game
             return this;
         }
 
+        /// <summary>
+        /// Attacks an enemy creature on the field.
+        /// </summary>
         public GameInstance AttackCreature(PlayerInstance player, CreatureCardInstance attacker, CreatureCardInstance target)
         {
             CheckTurn(player);
@@ -170,6 +173,45 @@ namespace CardGame.Server.Instances.Game
         }
 
         /// <summary>
+        /// Attacks the enemy player directly
+        /// </summary>
+        public GameInstance AttackPlayer(PlayerInstance player, CreatureCardInstance attacker, PlayerInstance target)
+        {
+            CheckTurn(player);
+
+            // If the card has no attacks left
+            if (attacker.AttacksLeft == 0)
+            {
+                throw new Exception("This card cannot attack anymore during this turn");
+            }
+
+            // If the target is the player
+            if (attacker.Owner == target)
+            {
+                throw new Exception("You cannot attack yourself");
+            }
+
+            // If there's a card with taunt but I'm not attacking a card with taunt
+            if (Opponent.Field.Any(c => c.Features.HasFlag(CardFeature.Taunt)))
+            {
+                throw new Exception("There's a card with taunt on the opponent's field");
+            }
+
+            NotifyAll(c => c.OnBeforeAttack(attacker, target));
+
+            attacker.AttacksLeft--;
+
+            var damage = attacker.GetAttackDamage(target);
+            DamagePlayer(attacker, target, damage);
+
+            DestroyZeroHealth();
+
+            NotifyAll(c => c.OnAfterAttack(attacker, target, damage));
+
+            return this;
+        }
+
+        /// <summary>
         /// Draws <paramref name="count"/> cards from the <paramref name="player"/>'s deck.
         /// </summary>
         /// <param name="drawEventSource">The cause of the draw</param>
@@ -186,7 +228,7 @@ namespace CardGame.Server.Instances.Game
             {
                 if (player.Deck.Count == 0)
                 {
-                    DamagePlayer(player, 1);
+                    DamagePlayer(null, player, 1);
                     return this;
                 }
                 else
@@ -241,14 +283,25 @@ namespace CardGame.Server.Instances.Game
             return this;
         }
 
+        public GameInstance RestorePlayerHealth(PlayerInstance target, int amount)
+        {
+            var healAmount = Math.Min(target.InitialHealth - target.CurrentHealth, amount);
+            target.CurrentHealth += healAmount;
+
+            NotifyAll(c => c.OnPlayerHealed(target, healAmount));
+
+            return this;
+        }
+
         /// <summary>
         /// Damage the player due to an effect (not for direct attacks).
         /// </summary>
-        public GameInstance DamagePlayer(PlayerInstance target, int damage)
+        public GameInstance DamagePlayer(CardInstance source, PlayerInstance target, int damage)
         {
             if (target.CurrentHealth > damage)
             {
                 target.CurrentHealth -= damage;
+                NotifyAll(c => c.OnPlayerDamaged(source, target, damage));
             }
             else
             {
@@ -291,12 +344,20 @@ namespace CardGame.Server.Instances.Game
             return this;
         }
 
+        public GameInstance Surrender(PlayerInstance player)
+        {
+            Status = GameStatus.Finished;
+            Winner = GetOpponent(player);
+
+            return this;
+        }
+
         /// <summary>
         /// Checks the victory condition and possibly ends the game.
         /// </summary>
         public GameInstance CheckVictory()
         {
-            // If both players's health drops to 0 at the same time, the player that is currently
+            // If both players' health drops to 0 at the same time, the player that is currently
             // playing will lose.
             if (CurrentPlayer.CurrentHealth == 0)
             {
@@ -314,6 +375,9 @@ namespace CardGame.Server.Instances.Game
         #endregion
 
         #region Private Methods
+        private PlayerInstance GetOpponent(PlayerInstance player)
+            => player == CurrentPlayer ? Opponent : CurrentPlayer;
+
         private void CheckTurn(PlayerInstance player)
         {
             if (player != CurrentPlayer)

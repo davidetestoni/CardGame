@@ -57,17 +57,17 @@ namespace SampleGame.Tests.Extensions
         }
 
         /// <summary>
-        /// Helper method that sets the current fields of players when they only have a single creature.
+        /// Helper method that sets a 1 vs 1 scenario.
         /// </summary>
-        public static GameInstance SetFields(this GameInstance game, Card currentPlayerCard, Card opponentCard = null)
+        public static GameInstance SetFields1v1(this GameInstance game, Card currentPlayerCard, Card opponentCard = null)
             => SetFields(game,
                 currentPlayerCard is null ? new List<Card>() : new List<Card> { currentPlayerCard },
                 opponentCard is null ? new List<Card>() : new List<Card> { opponentCard });
 
         /// <summary>
-        /// Helper method that sets the current fields of players in a 1 vs many creatures scenario.
+        /// Helper method that sets a 1 vs many scenario.
         /// </summary>
-        public static GameInstance SetFields(this GameInstance game, Card currentPlayerCard, List<Card> opponentField = null)
+        public static GameInstance SetFields1vMany(this GameInstance game, Card currentPlayerCard, List<Card> opponentField = null)
             => SetFields(game,
                 currentPlayerCard is null ? new List<Card>() : new List<Card> { currentPlayerCard },
                 opponentField);

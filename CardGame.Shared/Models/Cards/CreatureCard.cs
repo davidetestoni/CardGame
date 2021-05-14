@@ -8,16 +8,16 @@ namespace CardGame.Shared.Models.Cards
         /// <summary>
         /// The base value of the attack of this card.
         /// </summary>
-        public int Attack { get; init; } = 1;
+        public int Attack { get; set; } = 1;
 
         /// <summary>
         /// The base value of the health of this card.
         /// </summary>
-        public int Health { get; init; } = 1;
+        public int Health { get; set; } = 1;
 
         /// <summary>
         /// The effects of this card.
         /// </summary>
-        public List<Effect> Effects { get; init; } = new();
+        public List<Effect> Effects { get; set; } = new List<Effect>();
     }
 }

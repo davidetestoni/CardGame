@@ -23,7 +23,7 @@ namespace CardGame.Server.Factories
         /// </summary>
         public CardInstanceFactory(Assembly assembly)
         {
-            _cards = new();
+            _cards = new Dictionary<Card, Type>();
 
             foreach (var type in assembly.GetTypes().Where(t => IsPlayableCard(t)))
             {
@@ -47,11 +47,14 @@ namespace CardGame.Server.Factories
 
         private CardInstance Create(Card card, GameInstance game, PlayerInstance owner)
         {
-            var instance = card switch
+            CardInstance instance = null;
+
+            switch (card)
             {
-                CreatureCard x => CreateCreature(x),
-                _ => throw new NotImplementedException()
-            };
+                case CreatureCard x:
+                    instance = CreateCreature(x);
+                    break;
+            }
 
             instance.Game = game;
             instance.Owner = owner;
@@ -81,6 +84,6 @@ namespace CardGame.Server.Factories
             => type.CustomAttributes.Any(a => a.AttributeType == typeof(PlayableCard));
 
         private static bool HasAttribute<T>(Type type) where T : Attribute
-            => type.GetCustomAttribute<T>() is not null;
+            => type.GetCustomAttribute<T>() != null;
     }
 }

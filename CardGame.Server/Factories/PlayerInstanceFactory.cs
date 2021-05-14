@@ -1,6 +1,7 @@
 ﻿using CardGame.Server.Extensions;
 using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
+using CardGame.Server.Models.Cards.Instances;
 using CardGame.Shared.Models.Cards;
 using CardGame.Shared.Models.Players;
 using System;
@@ -24,9 +25,9 @@ namespace CardGame.Server.Factories
                 Name = player.Name,
                 CurrentMana = 0,
                 MaximumMana = 0,
-                Field = new(),
-                Graveyard = new(),
-                Hand = new()
+                Field = new List<CreatureCardInstance>(),
+                Graveyard = new List<Card>(),
+                Hand = new List<CardInstance>()
             };
 
             var deck = new List<Card>();

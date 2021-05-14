@@ -25,7 +25,7 @@ namespace CardGame.Server.Instances.Game
         public PlayerInstance Opponent => PlayerOne != CurrentPlayer ? PlayerOne : PlayerTwo;
 
         public GameInstanceOptions Options { get; set; }
-        public Random Random { get; } = new();
+        public Random Random { get; } = new Random();
 
         public GameStatus Status { get; set; } = GameStatus.Created;
         public PlayerInstance Winner { get; set; } = null;

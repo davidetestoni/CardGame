@@ -15,9 +15,9 @@ namespace CardGame.Server.Networking
         private EventBasedNetListener listener;
         private NetManager server;
         private BackgroundWorker worker;
-        private readonly Random rand = new();
+        private readonly Random rand = new Random();
 
-        private readonly Dictionary<NetPeer, Guid> peerIds = new();
+        private readonly Dictionary<NetPeer, Guid> peerIds = new Dictionary<NetPeer, Guid>();
 
         public string Key { get; private set; }
         public List<NetPeer> ConnectedClients => server.ConnectedPeerList;
@@ -41,8 +41,8 @@ namespace CardGame.Server.Networking
 
         public GameServer Start(int port)
         {
-            listener = new();
-            server = new(listener);
+            listener = new EventBasedNetListener();
+            server = new NetManager(listener);
             server.Start("127.0.0.1", "::1", port);
 
             Key = RandomString(8);
@@ -68,7 +68,7 @@ namespace CardGame.Server.Networking
                 ClientConnected?.Invoke(this, id);
                 
                 // Send hello to the peer in a reliable way
-                NetDataWriter writer = new();
+                NetDataWriter writer = new NetDataWriter();
                 writer.Put("HELLO");
                 peer.Send(writer, DeliveryMethod.ReliableOrdered);
             };
@@ -77,7 +77,7 @@ namespace CardGame.Server.Networking
             {
                 // Get a string with maximum 10000 characters
                 var message = reader.GetString(10000);
-                MessageReceived?.Invoke(this, new(message, peerIds[peer]));
+                MessageReceived?.Invoke(this, new ClientMessageWrapper(message, peerIds[peer]));
                 clientMessageHandler.Handle(message, peerIds[peer]);
                 reader.Recycle();
             };

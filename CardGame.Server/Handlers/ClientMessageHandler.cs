@@ -8,7 +8,7 @@ namespace CardGame.Server.Handlers
     public class ClientMessageHandler
     {
         private readonly JsonSerializerSettings jsonSettings =
-            new() { TypeNameHandling = TypeNameHandling.Auto };
+            new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
 
         public event EventHandler<ClientMessageWrapper> InvalidMessageReceived;
         public event EventHandler<ClientMessage> MessageReceived;
@@ -26,7 +26,7 @@ namespace CardGame.Server.Handlers
             }
             catch
             {
-                InvalidMessageReceived?.Invoke(this, new(str, senderId));
+                InvalidMessageReceived?.Invoke(this, new ClientMessageWrapper(str, senderId));
                 return;
             }
         }

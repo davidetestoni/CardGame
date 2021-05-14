@@ -15,7 +15,7 @@ namespace CardGame.Client.Networking
 
         public GameClient Connect(string host, int port, string key)
         {
-            listener = new();
+            listener = new EventBasedNetListener();
 
             listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod) =>
             {
@@ -24,7 +24,7 @@ namespace CardGame.Client.Networking
                 dataReader.Recycle();
             };
 
-            client = new(listener);
+            client = new NetManager(listener);
             client.Start();
             client.Connect(host, port, key);
 

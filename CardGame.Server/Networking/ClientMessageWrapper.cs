@@ -4,8 +4,8 @@ namespace CardGame.Server.Networking
 {
     public class ClientMessageWrapper
     {
-        public string Body { get; init; }
-        public Guid SenderId { get; init; }
+        public string Body { get; }
+        public Guid SenderId { get; }
 
         public ClientMessageWrapper(string body, Guid senderId)
         {

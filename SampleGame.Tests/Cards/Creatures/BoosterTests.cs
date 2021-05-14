@@ -1,4 +1,5 @@
-﻿using SampleGame.Cards.Creatures;
+﻿using CardGame.Server.Models.Cards.Instances;
+using SampleGame.Cards.Creatures;
 using SampleGame.Tests.Extensions;
 using Xunit;
 
@@ -19,11 +20,14 @@ namespace SampleGame.Tests.Cards.Creatures
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetMana(2, 2)
-                .SetHands(new Booster());
+                .SetMana(2, 2);
+
+            var booster = _factoryFixture.CardFactory.Create<Booster>(game, game.CurrentPlayer) as CreatureCardInstance;
+
+            game
+                .SetHands(booster);
 
             // Play the booster
-            var booster = game.CurrentPlayer.GetCreatureInHand<Booster>();
             game.PlayCreatureFromHand(game.CurrentPlayer, booster);
 
             Assert.Single(game.CurrentPlayer.Hand);

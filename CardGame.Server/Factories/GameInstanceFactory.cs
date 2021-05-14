@@ -1,6 +1,7 @@
 ﻿using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
 using CardGame.Shared.Models.Players;
+using System;
 
 namespace CardGame.Server.Factories
 {
@@ -19,6 +20,7 @@ namespace CardGame.Server.Factories
         {
             return new GameInstance(_cardFactory)
             {
+                Id = Guid.NewGuid(),
                 Options = options,
                 PlayerOne = CreatePlayer(options, playerOne),
                 PlayerTwo = CreatePlayer(options, playerTwo)

@@ -17,7 +17,7 @@ namespace CardGame.Server.Instances.Players
         /// <summary>
         /// The cards in the hand.
         /// </summary>
-        public List<Card> Hand { get; set; }
+        public List<CardInstance> Hand { get; set; }
 
         /// <summary>
         /// The cards in the deck.

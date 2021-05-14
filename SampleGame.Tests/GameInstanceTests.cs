@@ -1,5 +1,6 @@
 ﻿using CardGame.Server.Enums;
 using CardGame.Server.Instances.Game;
+using CardGame.Server.Models.Cards.Instances;
 using CardGame.Shared.Models.Cards;
 using SampleGame.Cards.Creatures;
 using SampleGame.Tests.Extensions;
@@ -71,7 +72,7 @@ namespace SampleGame.Tests
             game.Start();
 
             var handSize = game.CurrentPlayer.Hand.Count;
-            var card = (CreatureCard)game.CurrentPlayer.Hand[0];
+            var card = (CreatureCardInstance)game.CurrentPlayer.Hand[0];
             game.PlayCreatureFromHand(game.CurrentPlayer, card);
 
             Assert.Equal(handSize - 1, game.CurrentPlayer.Hand.Count);
@@ -85,8 +86,8 @@ namespace SampleGame.Tests
             var game = _factoryFixture.CreateTestGame();
             game.Start();
 
-            var card1 = (CreatureCard)game.CurrentPlayer.Hand[0];
-            var card2 = (CreatureCard)game.CurrentPlayer.Hand[1];
+            var card1 = (CreatureCardInstance)game.CurrentPlayer.Hand[0];
+            var card2 = (CreatureCardInstance)game.CurrentPlayer.Hand[1];
             game.PlayCreatureFromHand(game.CurrentPlayer, card1);
             
             Assert.Throws<Exception>(() => game.PlayCreatureFromHand(game.CurrentPlayer, card2));
@@ -98,7 +99,7 @@ namespace SampleGame.Tests
             var game = _factoryFixture.CreateTestGame();
             game.Start();
 
-            var card = (CreatureCard)game.CurrentPlayer.Hand[0];
+            var card = (CreatureCardInstance)game.CurrentPlayer.Hand[0];
             Assert.Throws<Exception>(() => game.PlayCreatureFromHand(game.Opponent, card));
         }
         #endregion
@@ -412,19 +413,21 @@ namespace SampleGame.Tests
         [Fact]
         public void AttackCreature_Rush_AttackImmediately()
         {
-            var game = 
+            var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetMana(2, 2)
-                .SetHands(new Quickshot())
+                .SetMana(2, 2);
+
+            var quickshot = _factoryFixture.CardFactory.Create<Quickshot>(game, game.CurrentPlayer) as CreatureCardInstance;
+
+            game
+                .SetHands(quickshot)
                 .SetFields1v1(null, new BasicSoldier());
 
             // Play the quickshot
-            var quickshotCard = game.CurrentPlayer.GetCreatureInHand<Quickshot>();
-            game.PlayCreatureFromHand(game.CurrentPlayer, quickshotCard);
+            game.PlayCreatureFromHand(game.CurrentPlayer, quickshot);
 
             // Attack immediately
-            var quickshot = game.CurrentPlayer.GetCreatureOnField<Quickshot>();
             var soldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
             game.AttackCreature(game.CurrentPlayer, quickshot, soldier);
 

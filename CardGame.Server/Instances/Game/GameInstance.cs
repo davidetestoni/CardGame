@@ -1,4 +1,5 @@
 ﻿using CardGame.Server.Enums;
+using CardGame.Server.Events;
 using CardGame.Server.Factories;
 using CardGame.Server.Instances.Players;
 using CardGame.Server.Models.Cards.Instances;
@@ -14,6 +15,8 @@ namespace CardGame.Server.Instances.Game
         private readonly CardInstanceFactory _cardFactory;
 
         #region Public Properties
+        public Guid Id { get; set; }
+
         public PlayerInstance PlayerOne { get; set; }
         public PlayerInstance PlayerTwo { get; set; }
 
@@ -26,6 +29,10 @@ namespace CardGame.Server.Instances.Game
 
         public GameStatus Status { get; set; } = GameStatus.Created;
         public PlayerInstance Winner { get; set; } = null;
+        #endregion
+
+        #region Events
+        public event EventHandler<CreatureAttackedEvent> CreatureAttacked;
         #endregion
 
         /// <summary>
@@ -57,7 +64,7 @@ namespace CardGame.Server.Instances.Game
         /// <summary>
         /// Plays a creature <paramref name="card"/> from the <paramref name="player"/>'s hand.
         /// </summary>
-        public GameInstance PlayCreatureFromHand(PlayerInstance player, CreatureCard card)
+        public GameInstance PlayCreatureFromHand(PlayerInstance player, CreatureCardInstance card)
         {
             CheckTurn(player);
 
@@ -80,17 +87,16 @@ namespace CardGame.Server.Instances.Game
             player.Hand.Remove(card);
             player.CurrentMana -= card.ManaCost;
 
-            // Create an instance of the card and add it to the field
-            var instance = (CreatureCardInstance)_cardFactory.Create(card.ShortName, this, player);
-            player.Field.Add(instance);
+            // Add it to the field
+            player.Field.Add(card);
 
             // If the card has Rush, reset its attacks left
-            if (instance.Features.HasFlag(CardFeature.Rush))
+            if (card.Features.HasFlag(CardFeature.Rush))
             {
-                instance.ResetAttacksLeft();
+                card.ResetAttacksLeft();
             }
 
-            NotifyAll(c => c.OnCreaturePlayed(player, instance));
+            NotifyAll(c => c.OnCreaturePlayed(player, card));
 
             return this;
         }
@@ -240,7 +246,8 @@ namespace CardGame.Server.Instances.Game
                     // If it fits, put it in hand
                     if (player.Hand.Count < Options.MaximumHandSize)
                     {
-                        player.Hand.Add(card);
+                        var instance = (CreatureCardInstance)_cardFactory.Create(card.ShortName, this, player);
+                        player.Hand.Add(instance);
                     }
                     // Otherwise send it to the graveyard
                     else

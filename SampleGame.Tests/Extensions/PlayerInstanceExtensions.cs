@@ -13,7 +13,7 @@ namespace SampleGame.Tests.Extensions
         public static CreatureCardInstance GetCreatureOnField<T>(this PlayerInstance player) where T : CreatureCard
             => player.Field.FirstOrDefault(c => c.Base is T);
 
-        public static CreatureCard GetCreatureInHand<T>(this PlayerInstance player) where T : CreatureCard
-            => player.Hand.FirstOrDefault(c => c is T) as CreatureCard;
+        public static CreatureCardInstance GetCreatureInHand<T>(this PlayerInstance player) where T : CreatureCard
+            => player.Hand.FirstOrDefault(c => c is T) as CreatureCardInstance;
     }
 }

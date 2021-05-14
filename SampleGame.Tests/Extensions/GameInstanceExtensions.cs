@@ -29,13 +29,15 @@ namespace SampleGame.Tests.Extensions
         /// <summary>
         /// Helper method that sets the current hands of players.
         /// </summary>
-        public static GameInstance SetHands(this GameInstance game, Card currentPlayerCard, Card opponentCard = null)
-            => SetHands(game, new List<Card> { currentPlayerCard }, opponentCard is null ? new List<Card>() : new List<Card> { opponentCard });
+        public static GameInstance SetHands(this GameInstance game, CardInstance currentPlayerCard, CardInstance opponentCard = null)
+            => SetHands(game, new List<CardInstance> { currentPlayerCard }, opponentCard is null
+                ? new List<CardInstance>()
+                : new List<CardInstance> { opponentCard });
 
         /// <summary>
         /// Helper method that sets the current hands of players.
         /// </summary>
-        public static GameInstance SetHands(this GameInstance game, List<Card> currentPlayerHand = null, List<Card> opponentHand = null)
+        public static GameInstance SetHands(this GameInstance game, List<CardInstance> currentPlayerHand = null, List<CardInstance> opponentHand = null)
         {
             currentPlayerHand ??= new();
             opponentHand ??= new();

@@ -1,4 +1,4 @@
-﻿using CardGame.Server.Models.Cards.Instances;
+﻿using CardGame.Server.Instances.Cards;
 using CardGame.Shared.Attributes;
 using CardGame.Shared.Models.Cards;
 
@@ -21,6 +21,6 @@ namespace SampleGame.Cards.Creatures
 
     public class AttackerInstance : CreatureCardInstance
     {
-        public override int GetAttackDamage(CreatureCardInstance target) => Attack + 1;
+        public override int GetAttackDamage(CreatureCardInstance target, bool isDefending) => Attack + 1;
     }
 }

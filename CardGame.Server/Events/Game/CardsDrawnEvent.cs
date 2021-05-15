@@ -1,5 +1,5 @@
-﻿using CardGame.Server.Instances.Players;
-using CardGame.Server.Models.Cards.Instances;
+﻿using CardGame.Server.Instances.Cards;
+using CardGame.Server.Instances.Players;
 using System.Collections.Generic;
 
 namespace CardGame.Server.Events.Game

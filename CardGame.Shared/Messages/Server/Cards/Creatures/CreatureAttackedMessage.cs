@@ -12,7 +12,7 @@ namespace CardGame.Shared.Messages.Server.Cards.Creatures
         /// <summary>
         /// The id of the creature that was attacked.
         /// </summary>
-        public Guid TargetId { get; set; }
+        public Guid DefenderId { get; set; }
 
         /// <summary>
         /// The damage inflicted to the target.

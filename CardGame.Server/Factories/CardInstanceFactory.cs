@@ -1,6 +1,6 @@
 ﻿using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
-using CardGame.Server.Models.Cards.Instances;
+using CardGame.Server.Instances.Cards;
 using CardGame.Shared.Attributes;
 using CardGame.Shared.Enums;
 using CardGame.Shared.Models.Cards;

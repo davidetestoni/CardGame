@@ -1,12 +1,11 @@
 ﻿using CardGame.Server.Enums;
-using CardGame.Server.Instances.Game;
-using CardGame.Server.Models.Cards.Instances;
+using CardGame.Server.Instances.Cards;
+using CardGame.Shared.Enums;
 using CardGame.Shared.Models.Cards;
 using SampleGame.Cards.Creatures;
 using SampleGame.Tests.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace SampleGame.Tests

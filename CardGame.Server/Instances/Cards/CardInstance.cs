@@ -3,7 +3,7 @@ using CardGame.Server.Instances.Players;
 using CardGame.Shared.Models.Cards;
 using System;
 
-namespace CardGame.Server.Models.Cards.Instances
+namespace CardGame.Server.Instances.Cards
 {
     /// <summary>
     /// This is the instance of a card in the game. When a <see cref="Card"/> is
@@ -30,5 +30,10 @@ namespace CardGame.Server.Models.Cards.Instances
         /// The current mana cost of the card instance.
         /// </summary>
         public int ManaCost { get; set; }
+
+        /// <summary>
+        /// The shortname of the base card.
+        /// </summary>
+        public virtual string ShortName { get; }
     }
 }

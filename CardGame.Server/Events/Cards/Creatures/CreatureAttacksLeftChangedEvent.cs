@@ -1,4 +1,4 @@
-﻿using CardGame.Server.Models.Cards.Instances;
+﻿using CardGame.Server.Instances.Cards;
 
 namespace CardGame.Server.Events.Cards.Creatures
 {

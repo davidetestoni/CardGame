@@ -1,4 +1,4 @@
-﻿using CardGame.Server.Models.Cards.Instances;
+﻿using CardGame.Server.Instances.Cards;
 using SampleGame.Cards.Creatures;
 using SampleGame.Tests.Extensions;
 using Xunit;

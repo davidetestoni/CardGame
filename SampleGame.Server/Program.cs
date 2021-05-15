@@ -15,8 +15,11 @@ namespace SampleGame.Server
             var port = 9050;
 
             var game = new GameInstance(new CardInstanceFactory(typeof(BasicSoldier).Assembly));
-            var clientMessageHandler = new ClientMessageHandler();
+            var clientMessageHandler = new ClientMessageHandler(); // Takes care of receiving messages from clients and deserializing them
+            var playerActionHandler = new PlayerActionHandler(game, clientMessageHandler); // Performs the actions sent by clients on the game instance
             var server = new GameServer(clientMessageHandler).Start(port);
+            var gameEventHandler = new GameEventHandler(game, server); // Takes care of sending game events to clients
+
             Log.Info($"Server started on port {port}");
 
             server.ClientConnected += (sender, client) =>

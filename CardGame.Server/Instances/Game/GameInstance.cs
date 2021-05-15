@@ -4,7 +4,7 @@ using CardGame.Server.Events.Game;
 using CardGame.Server.Events.Players;
 using CardGame.Server.Factories;
 using CardGame.Server.Instances.Players;
-using CardGame.Server.Models.Cards.Instances;
+using CardGame.Server.Instances.Cards;
 using CardGame.Shared.Enums;
 using System;
 using System.Collections.Generic;
@@ -40,8 +40,10 @@ namespace CardGame.Server.Instances.Game
         public event EventHandler<GameEndedEvent> GameEnded;
         public event EventHandler<CardsDrawnEvent> CardsDrawn;
         public event EventHandler<CustomEvent> CustomEvent;
-        
+
         // Player
+        public event EventHandler<PlayerAttackedEvent> PlayerAttacked;
+
         // - Mana
         public event EventHandler<PlayerManaRestoredEvent> PlayerManaRestored;
         public event EventHandler<PlayerMaxManaIncreasedEvent> PlayerMaxManaIncreased;
@@ -402,7 +404,14 @@ namespace CardGame.Server.Instances.Game
                 CheckVictory();
             }
 
-            PlayerDamaged?.Invoke(this, new PlayerDamagedEvent { Player = target, Damage = damage });
+            if (source is CreatureCardInstance creature)
+            {
+                PlayerAttacked?.Invoke(this, new PlayerAttackedEvent { Player = target, Attacker = creature, Damage = damage });
+            }
+            else
+            {
+                PlayerDamaged?.Invoke(this, new PlayerDamagedEvent { Player = target, Damage = damage });
+            }
 
             return this;
         }
@@ -456,7 +465,7 @@ namespace CardGame.Server.Instances.Game
 
             player.MaximumMana += increment;
 
-            PlayerMaxManaIncreased?.Invoke(this, new PlayerMaxManaIncreasedEvent { Player = player, Amount = increment });
+            PlayerMaxManaIncreased?.Invoke(this, new PlayerMaxManaIncreasedEvent { Player = player, Increment = increment });
 
             return this;
         }

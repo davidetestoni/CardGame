@@ -1,7 +1,7 @@
 ﻿using CardGame.Server.Factories;
 using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
-using CardGame.Server.Models.Cards.Instances;
+using CardGame.Server.Instances.Cards;
 using CardGame.Shared.Models.Cards;
 using SampleGame.Cards.Creatures;
 using System;

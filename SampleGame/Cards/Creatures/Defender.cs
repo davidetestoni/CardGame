@@ -1,4 +1,4 @@
-﻿using CardGame.Server.Models.Cards.Instances;
+﻿using CardGame.Server.Instances.Cards;
 using CardGame.Shared.Attributes;
 using CardGame.Shared.Models.Cards;
 

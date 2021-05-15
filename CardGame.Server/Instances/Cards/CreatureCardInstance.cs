@@ -3,7 +3,7 @@ using CardGame.Server.Instances.Players;
 using CardGame.Shared.Enums;
 using CardGame.Shared.Models.Cards;
 
-namespace CardGame.Server.Models.Cards.Instances
+namespace CardGame.Server.Instances.Cards
 {
     public class CreatureCardInstance : CardInstance
     {
@@ -38,6 +38,9 @@ namespace CardGame.Server.Models.Cards.Instances
         /// Gets the current card features.
         /// </summary>
         public CardFeature Features { get; set; } = CardFeature.None;
+
+        /// <inheritdoc/>
+        public override string ShortName => Base.ShortName;
         #endregion
 
         // -----------------

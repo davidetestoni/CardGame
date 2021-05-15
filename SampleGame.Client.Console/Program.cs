@@ -1,4 +1,4 @@
-﻿using System;
+﻿using CardGame.Client.Networking;
 
 namespace SampleGame.Client.Console
 {
@@ -6,26 +6,21 @@ namespace SampleGame.Client.Console
     {
         static void Main(string[] args)
         {
+            var host = "127.0.0.1";
             var port = 9050;
 
-            var game = new GameInstance(new CardInstanceFactory(typeof(BasicSoldier).Assembly));
-            var clientMessageHandler = new ClientMessageHandler();
-            var server = new GameServer(clientMessageHandler).Start(port);
-            Log.Info($"Server started on port {port}");
-
-            server.ClientConnected += (sender, client) =>
+            var client = new GameClient();
+            client.MessageReceived += (sender, message) =>
             {
-                Log.Info($"Client {client} connected");
+                System.Console.WriteLine(message);
             };
 
-            server.MessageReceived += (sender, message) =>
-            {
-                Log.ClientMessage(message.Body, message.SenderId);
-            };
+            System.Console.Write("Key: ");
+            var key = System.Console.ReadLine();
 
-            Log.Info($"Key: {server.Key}");
+            client.Connect(host, port, key);
 
-            Console.ReadLine();
+
         }
     }
 }

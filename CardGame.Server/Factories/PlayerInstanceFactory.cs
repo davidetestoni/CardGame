@@ -1,7 +1,7 @@
 ﻿using CardGame.Server.Extensions;
 using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
-using CardGame.Server.Models.Cards.Instances;
+using CardGame.Server.Instances.Cards;
 using CardGame.Shared.Models.Cards;
 using CardGame.Shared.Models.Players;
 using System;

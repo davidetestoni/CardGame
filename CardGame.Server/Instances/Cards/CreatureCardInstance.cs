@@ -51,7 +51,12 @@ namespace CardGame.Server.Models.Cards.Instances
         /// Called before this card attacks another card. Returns the damage dealt by this card.
         /// </summary>
         /// <param name="target">The card that is being attacked</param>
-        public virtual int GetAttackDamage(CreatureCardInstance target) => Attack;
+        public virtual int GetAttackDamage(CreatureCardInstance target, bool isDefending) => Attack;
+
+        /// <summary>
+        /// Called when this card is attacked by another card. Return the damage taken.
+        /// </summary>
+        public virtual int ComputeDamageTaken(CreatureCardInstance attacker, int attackDamage, bool isDefending) => attackDamage;
 
         /// <summary>
         /// Called before this card attacks a player. Returns the damage dealt by this card.

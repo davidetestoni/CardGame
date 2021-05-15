@@ -1,73 +1,57 @@
 ﻿using CardGame.Server.Instances.Game;
-using CardGame.Server.Instances.Players;
-using CardGame.Server.Models.Cards.Instances;
-using CardGame.Shared.Messages;
-using CardGame.Shared.Messages.Client;
-using CardGame.Shared.Models.Cards;
-using System;
+using CardGame.Server.Networking;
+using CardGame.Shared.Messages.Server;
+using CardGame.Shared.Messages.Server.Game;
+using LiteNetLib;
 
 namespace CardGame.Server.Handlers
 {
     public class GameEventHandler
     {
         private readonly GameInstance game;
+        private readonly GameServer server;
 
-        public GameEventHandler(GameInstance game, ClientMessageHandler messageHandler)
+        public GameEventHandler(GameInstance game, GameServer server)
         {
             this.game = game;
-            messageHandler.MessageReceived += HandleMessage;
-        }
+            this.server = server;
 
-        private void HandleMessage(object sender, ClientMessage message)
-        {
-            var player = GetPlayer(message.PlayerId);
-
-            switch (message)
+            game.GameStarted += (sender, e) =>
             {
-                case AttackCreatureMessage x:
-                    game.AttackCreature(player, GetCreatureOnField(x.AttackerId, player), GetCreatureOnField(x.TargetId, player));
-                    break;
-            }
-        }
-
-        private PlayerInstance GetPlayer(Guid playerId)
-        {
-            if (game.PlayerOne.Id == playerId)
-            {
-                return game.PlayerOne;
-            }
-            else if (game.PlayerTwo.Id == playerId)
-            {
-                return game.PlayerTwo;
-            }
-
-            throw new Exception($"Player with id {playerId} not found");
-        }
-
-        private CreatureCardInstance GetCreatureOnField(Guid cardId, PlayerInstance player)
-        {
-            foreach (var card in player.Field)
-            {
-                if (card.Id == cardId)
+                var message = new GameStartedMessage
                 {
-                    return card;
-                }
-            }
+                    CurrentPlayerId = e.CurrentPlayer.Id
+                };
 
-            throw new Exception($"Card with id {cardId} not found");
+                BroadcastMessage(message);
+            };
+
+            game.GameEnded += (sender, e) =>
+            {
+                var message = new GameEndedMessage
+                {
+                    WinnerId = e.Winner.Id
+                };
+
+                BroadcastMessage(message);
+            };
+
+            game.NewTurn += (sender, e) =>
+            {
+                var message = new NewTurnMessage
+                {
+                    CurrentPlayerId = e.CurrentPlayer.Id,
+                    TurnNumber = e.TurnNumber
+                };
+
+                BroadcastMessage(message);
+            };
         }
 
-        private CardInstance GetCardInHand(Guid cardId, PlayerInstance player)
+        public void BroadcastMessage(ServerMessage message, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
         {
-            foreach (var card in player.Field)
-            {
-                if (card.Id == cardId)
-                {
-                    return card;
-                }
-            }
-
-            throw new Exception($"Card with id {cardId} not found");
+            var serialized = ServerMessageSerializer.Serialize(message);
+            server.BroadcastMessage(serialized, deliveryMethod);
         }
     }
 }

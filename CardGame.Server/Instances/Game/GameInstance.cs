@@ -1,11 +1,13 @@
 ﻿using CardGame.Server.Enums;
-using CardGame.Server.Events;
+using CardGame.Server.Events.Cards.Creatures;
+using CardGame.Server.Events.Game;
+using CardGame.Server.Events.Players;
 using CardGame.Server.Factories;
 using CardGame.Server.Instances.Players;
 using CardGame.Server.Models.Cards.Instances;
 using CardGame.Shared.Enums;
-using CardGame.Shared.Models.Cards;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CardGame.Server.Instances.Game
@@ -32,7 +34,36 @@ namespace CardGame.Server.Instances.Game
         #endregion
 
         #region Events
+        // Game
+        public event EventHandler<GameStartedEvent> GameStarted;
+        public event EventHandler<NewTurnEvent> NewTurn;
+        public event EventHandler<GameEndedEvent> GameEnded;
+        public event EventHandler<CardsDrawnEvent> CardsDrawn;
+        public event EventHandler<CustomEvent> CustomEvent;
+        
+        // Player
+        // - Mana
+        public event EventHandler<PlayerManaRestoredEvent> PlayerManaRestored;
+        public event EventHandler<PlayerMaxManaIncreasedEvent> PlayerMaxManaIncreased;
+        public event EventHandler<PlayerManaSpentEvent> PlayerManaSpent;
+
+        // - Health
+        public event EventHandler<PlayerHealthRestoredEvent> PlayerHealthRestored;
+        public event EventHandler<PlayerDamagedEvent> PlayerDamaged;
+
+        // Creatures
+        public event EventHandler<CreaturePlayedEvent> CreaturePlayed;
+        public event EventHandler<CreatureSpawnedEvent> CreatureSpawned;
         public event EventHandler<CreatureAttackedEvent> CreatureAttacked;
+        public event EventHandler<CreatureDestroyedEvent> CreatureDestroyed;
+        public event EventHandler<CreatureAttacksLeftChangedEvent> CreatureAttacksLeftChanged;
+
+        // - Health
+        public event EventHandler<CreatureDamagedEvent> CreatureDamaged;
+        public event EventHandler<CreatureHealthIncreasedEvent> CreatureHealthIncreased;
+        
+        // - Attack
+        public event EventHandler<CreatureAttackChangedEvent> CreatureAttackChanged;
         #endregion
 
         /// <summary>
@@ -50,30 +81,40 @@ namespace CardGame.Server.Instances.Game
         /// </summary>
         public GameInstance Start()
         {
+            // Randomly select a player who gets to play first
             CurrentPlayer = Random.Next() % 2 == 0 ? PlayerOne : PlayerTwo;
-            CurrentPlayer.MaximumMana = 1;
-            CurrentPlayer.CurrentMana = 1;
-            DrawCards(Opponent, Options.InitialHandSize, DrawEventSource.GameStart);
+
+            // Set max and current mana to 1
+            IncreaseMaxMana(CurrentPlayer, 1);
+            RestoreMana(CurrentPlayer, 1);
+
+            // Draw cards for both players (1 more for the opponent to reduce the disadvantage of playing second)
+            DrawCards(Opponent, Options.InitialHandSize + 1, DrawEventSource.GameStart);
             DrawCards(CurrentPlayer, Options.InitialHandSize, DrawEventSource.GameStart);
+
+            // Draw the card for the current turn
             DrawCards(CurrentPlayer, 1, DrawEventSource.TurnStart);
+
             Status = GameStatus.Started;
+            GameStarted?.Invoke(this, new GameStartedEvent { CurrentPlayer = CurrentPlayer });
+            NewTurn?.Invoke(this, new NewTurnEvent { CurrentPlayer = CurrentPlayer, TurnNumber = TurnNumber });
 
             return this;
         }
 
         /// <summary>
-        /// Plays a creature <paramref name="card"/> from the <paramref name="player"/>'s hand.
+        /// Plays a <paramref name="creature"/> from the <paramref name="player"/>'s hand.
         /// </summary>
-        public GameInstance PlayCreatureFromHand(PlayerInstance player, CreatureCardInstance card)
+        public GameInstance PlayCreatureFromHand(PlayerInstance player, CreatureCardInstance creature)
         {
-            CheckTurn(player);
+            ThrowIfNotPlayerTurn(player);
 
-            if (player.CurrentMana < card.ManaCost)
+            if (player.CurrentMana < creature.ManaCost)
             {
                 throw new Exception("Not enough mana");
             }
 
-            if (!player.Hand.Contains(card))
+            if (!player.Hand.Contains(creature))
             {
                 throw new Exception("The card was not in the player's hand");
             }
@@ -84,19 +125,20 @@ namespace CardGame.Server.Instances.Game
             }
                 
             // Remove the card from the player's hand and subtract the mana spent
-            player.Hand.Remove(card);
-            player.CurrentMana -= card.ManaCost;
+            player.Hand.Remove(creature);
+            SpendMana(player, creature.ManaCost);
 
             // Add it to the field
-            player.Field.Add(card);
+            player.Field.Add(creature);
 
             // If the card has Rush, reset its attacks left
-            if (card.Features.HasFlag(CardFeature.Rush))
+            if (creature.Features.HasFlag(CardFeature.Rush))
             {
-                card.ResetAttacksLeft();
+                ResetAttacksLeft(creature);
             }
 
-            NotifyAll(c => c.OnCreaturePlayed(player, card));
+            CreaturePlayed?.Invoke(this, new CreaturePlayedEvent { Player = player, Creature = creature });
+            NotifyAll(c => c.OnCreaturePlayed(player, creature));
 
             return this;
         }
@@ -106,7 +148,7 @@ namespace CardGame.Server.Instances.Game
         /// </summary>
         public GameInstance EndTurn(PlayerInstance player)
         {
-            CheckTurn(player);
+            ThrowIfNotPlayerTurn(player);
 
             // Proc effects for the turn end
             NotifyAll(c => c.OnTurnEnd(CurrentPlayer, TurnNumber));
@@ -114,15 +156,12 @@ namespace CardGame.Server.Instances.Game
             // Set the opponent as the current player
             CurrentPlayer = Opponent;
             TurnNumber++;
-            
-            // Gain a new mana point
-            if (CurrentPlayer.MaximumMana < Options.MaximumMana)
-            {
-                CurrentPlayer.MaximumMana++;
-            }
 
-            // Restore the maximum mana
-            CurrentPlayer.CurrentMana = CurrentPlayer.MaximumMana;
+            NewTurn?.Invoke(this, new NewTurnEvent { CurrentPlayer = CurrentPlayer, TurnNumber = TurnNumber });
+
+            // Gain a new mana point and restore mana
+            IncreaseMaxMana(CurrentPlayer, 1);
+            RestoreMana(CurrentPlayer, CurrentPlayer.MaximumMana);
 
             // Draw a card
             DrawCards(CurrentPlayer, 1, DrawEventSource.TurnStart);
@@ -139,9 +178,9 @@ namespace CardGame.Server.Instances.Game
         /// <summary>
         /// Attacks an enemy creature on the field.
         /// </summary>
-        public GameInstance AttackCreature(PlayerInstance player, CreatureCardInstance attacker, CreatureCardInstance target)
+        public GameInstance AttackCreature(PlayerInstance player, CreatureCardInstance attacker, CreatureCardInstance defender)
         {
-            CheckTurn(player);
+            ThrowIfNotPlayerTurn(player);
 
             // If the card has no attacks left
             if (attacker.AttacksLeft == 0)
@@ -150,30 +189,43 @@ namespace CardGame.Server.Instances.Game
             }
 
             // If the target has the same owner
-            if (attacker.Owner == target.Owner)
+            if (attacker.Owner == defender.Owner)
             {
                 throw new Exception("The attacker and the target belong to the same player");
             }
 
             // If there's a card with taunt but I'm not attacking a card with taunt
-            if (Opponent.Field.Any(c => c.Features.HasFlag(CardFeature.Taunt)) && !target.Features.HasFlag(CardFeature.Taunt))
+            if (Opponent.Field.Any(c => c.Features.HasFlag(CardFeature.Taunt)) && !defender.Features.HasFlag(CardFeature.Taunt))
             {
                 throw new Exception("There's a card with taunt on the opponent's field");
             }
 
-            NotifyAll(c => c.OnBeforeAttack(attacker, target));
+            NotifyAll(c => c.OnBeforeAttack(attacker, defender));
 
-            attacker.AttacksLeft--;
+            SetAttacksLeft(attacker, attacker.AttacksLeft - 1);
 
-            var damage = attacker.GetAttackDamage(target);
-            var recoilDamage = target.GetAttackDamage(target);
+            // Calculate the attack damage
+            var attackDamage = attacker.GetAttackDamage(defender, false);
+            var defenderAttackDamage = defender.GetAttackDamage(attacker, true);
+            
+            // Calculate the damage taken
+            var damage = defender.ComputeDamageTaken(attacker, attackDamage, true);
+            var recoilDamage = attacker.ComputeDamageTaken(defender, defenderAttackDamage, false);
 
-            NotifyAll(c => c.OnCardDamaged(attacker, target, damage));
-            NotifyAll(c => c.OnCardDamaged(target, attacker, recoilDamage));
+            NotifyAll(c => c.OnCardDamaged(attacker, defender, damage));
+            NotifyAll(c => c.OnCardDamaged(defender, attacker, recoilDamage));
+
+            CreatureAttacked?.Invoke(this, new CreatureAttackedEvent
+            {
+                Attacker = attacker,
+                Defender = defender,
+                Damage = damage,
+                RecoilDamage = recoilDamage
+            });
 
             DestroyZeroHealth();
 
-            NotifyAll(c => c.OnAfterAttack(attacker, target, damage));
+            NotifyAll(c => c.OnAfterAttack(attacker, defender, attackDamage));
 
             return this;
         }
@@ -183,7 +235,7 @@ namespace CardGame.Server.Instances.Game
         /// </summary>
         public GameInstance AttackPlayer(PlayerInstance player, CreatureCardInstance attacker, PlayerInstance target)
         {
-            CheckTurn(player);
+            ThrowIfNotPlayerTurn(player);
 
             // If the card has no attacks left
             if (attacker.AttacksLeft == 0)
@@ -205,7 +257,7 @@ namespace CardGame.Server.Instances.Game
 
             NotifyAll(c => c.OnBeforeAttack(attacker, target));
 
-            attacker.AttacksLeft--;
+            SetAttacksLeft(attacker, attacker.AttacksLeft - 1);
 
             var damage = attacker.GetAttackDamage(target);
             DamagePlayer(attacker, target, damage);
@@ -225,9 +277,10 @@ namespace CardGame.Server.Instances.Game
         {
             if (drawEventSource != DrawEventSource.GameStart)
             {
-                CheckTurn(player);
+                ThrowIfNotPlayerTurn(player);
             }
 
+            List<CardInstance> newCards = new List<CardInstance>();
             int drawn = 0;
 
             while (drawn < count)
@@ -247,6 +300,7 @@ namespace CardGame.Server.Instances.Game
                     if (player.Hand.Count < Options.MaximumHandSize)
                     {
                         var instance = (CreatureCardInstance)_cardFactory.Create(card.ShortName, this, player);
+                        newCards.Add(instance);
                         player.Hand.Add(instance);
                     }
                     // Otherwise send it to the graveyard
@@ -260,19 +314,50 @@ namespace CardGame.Server.Instances.Game
             }
 
             NotifyAll(c => c.OnCardsDrawn(player, count, drawEventSource));
+            CardsDrawn?.Invoke(this, new CardsDrawnEvent { Player = player, NewCards = newCards });
 
             return this;
         }
 
         /// <summary>
-        /// Destroys a card on the field and sends it to the graveyard.
+        /// Destroys a creature on the field and sends it to the graveyard.
         /// </summary>
-        public GameInstance DestroyCard(CardInstance destroyer, CreatureCardInstance target)
+        public GameInstance DestroyCreature(CardInstance destroyer, CreatureCardInstance target)
         {
             target.Owner.Field.Remove(target);
             target.Owner.Graveyard.Add(target.Base);
 
             NotifyAll(c => c.OnCardDestroyed(destroyer, target));
+
+            CreatureDestroyed?.Invoke(this, new CreatureDestroyedEvent
+            {
+                Destroyer = destroyer,
+                Target = target,
+            });
+
+            return this;
+        }
+
+        public GameInstance SetAttacksLeft(CreatureCardInstance creature, int amount)
+        {
+            creature.AttacksLeft = amount;
+            CreatureAttacksLeftChanged?.Invoke(this, new CreatureAttacksLeftChangedEvent
+            {
+                Creature = creature,
+                CanAttack = creature.AttacksLeft > 0
+            });
+
+            return this;
+        }
+
+        public GameInstance ResetAttacksLeft(CreatureCardInstance creature)
+        {
+            creature.ResetAttacksLeft();
+            CreatureAttacksLeftChanged?.Invoke(this, new CreatureAttacksLeftChangedEvent 
+            {
+                Creature = creature, 
+                CanAttack = creature.AttacksLeft > 0 
+            });
 
             return this;
         }
@@ -296,6 +381,7 @@ namespace CardGame.Server.Instances.Game
             target.CurrentHealth += healAmount;
 
             NotifyAll(c => c.OnPlayerHealed(target, healAmount));
+            PlayerHealthRestored?.Invoke(this, new PlayerHealthRestoredEvent { Player = target, Amount = healAmount });
 
             return this;
         }
@@ -316,6 +402,62 @@ namespace CardGame.Server.Instances.Game
                 CheckVictory();
             }
 
+            PlayerDamaged?.Invoke(this, new PlayerDamagedEvent { Player = target, Damage = damage });
+
+            return this;
+        }
+
+        public GameInstance RestoreMana(PlayerInstance player, int amount)
+        {
+            var targetMana = Math.Min(player.MaximumMana, player.CurrentMana + amount);
+            var increment = targetMana - player.CurrentMana;
+
+            if (increment == 0)
+            {
+                return this;
+            }
+            
+            player.CurrentMana += increment;
+
+            PlayerManaRestored?.Invoke(this, new PlayerManaRestoredEvent { Player = player, Amount = increment });
+
+            return this;
+        }
+
+        public GameInstance SpendMana(PlayerInstance player, int amount)
+        {
+            if (amount > player.CurrentMana)
+            {
+                throw new Exception("Not enough mana");
+            }
+
+            player.CurrentMana -= amount;
+
+            PlayerManaSpent?.Invoke(this, new PlayerManaSpentEvent { Player = player, Amount = amount });
+
+            return this;
+        }
+
+        public GameInstance IncreaseMaxMana(PlayerInstance player, int amount, bool canOverflow = false)
+        {
+            var targetMana = player.MaximumMana + amount;
+
+            if (targetMana > Options.MaximumMana && !canOverflow)
+            {
+                targetMana = Options.MaximumMana;
+            }
+
+            var increment = targetMana - player.CurrentMana;
+
+            if (increment == 0)
+            {
+                return this;
+            }
+
+            player.MaximumMana += increment;
+
+            PlayerMaxManaIncreased?.Invoke(this, new PlayerMaxManaIncreasedEvent { Player = player, Amount = increment });
+
             return this;
         }
 
@@ -326,24 +468,22 @@ namespace CardGame.Server.Instances.Game
         {
             for (int i = 0; i < CurrentPlayer.Field.Count; i++)
             {
-                var card = CurrentPlayer.Field[i];
+                var creature = CurrentPlayer.Field[i];
 
-                if (card.Health == 0)
+                if (creature.Health == 0)
                 {
-                    card.Owner.Field.Remove(card);
-                    card.Owner.Graveyard.Add(card.Base);
+                    DestroyCreature(null, creature);
                     i--;
                 }
             }
 
             for (int i = 0; i < Opponent.Field.Count; i++)
             {
-                var card = Opponent.Field[i];
+                var creature = Opponent.Field[i];
 
-                if (card.Health == 0)
+                if (creature.Health == 0)
                 {
-                    card.Owner.Field.Remove(card);
-                    card.Owner.Graveyard.Add(card.Base);
+                    DestroyCreature(null, creature);
                     i--;
                 }
             }
@@ -351,10 +491,17 @@ namespace CardGame.Server.Instances.Game
             return this;
         }
 
+        public GameInstance TriggerCustomEvent(string shortName, object data)
+        {
+            CustomEvent?.Invoke(this, new CustomEvent { ShortName = shortName, Data = data });
+            return this;
+        }
+
         public GameInstance Surrender(PlayerInstance player)
         {
             Status = GameStatus.Finished;
             Winner = GetOpponent(player);
+            GameEnded?.Invoke(this, new GameEndedEvent { Winner = Winner, Surrender = true });
 
             return this;
         }
@@ -370,11 +517,13 @@ namespace CardGame.Server.Instances.Game
             {
                 Status = GameStatus.Finished;
                 Winner = Opponent;
+                GameEnded?.Invoke(this, new GameEndedEvent { Winner = Winner, Surrender = false });
             }
             else if (Opponent.CurrentHealth == 0)
             {
                 Status = GameStatus.Finished;
                 Winner = CurrentPlayer;
+                GameEnded?.Invoke(this, new GameEndedEvent { Winner = Winner, Surrender = false });
             }
 
             return this;
@@ -385,10 +534,12 @@ namespace CardGame.Server.Instances.Game
         private PlayerInstance GetOpponent(PlayerInstance player)
             => player == CurrentPlayer ? Opponent : CurrentPlayer;
 
-        private void CheckTurn(PlayerInstance player)
+        private void ThrowIfNotPlayerTurn(PlayerInstance player)
         {
             if (player != CurrentPlayer)
+            {
                 throw new Exception("It's not your turn");
+            }
         }
 
         private void NotifyAll(Action<CreatureCardInstance> action)

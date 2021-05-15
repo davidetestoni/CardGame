@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleGame.Tests", "SampleG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleGame.Server", "SampleGame.Server\SampleGame.Server.csproj", "{A130AC87-25D1-435F-9DC9-AC4CFE7CA503}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleGame.Client.Console", "SampleGame.Client.Console\SampleGame.Client.Console.csproj", "{4DAD9668-67B6-42B6-B0F9-CEAEE49A500A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{A130AC87-25D1-435F-9DC9-AC4CFE7CA503}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A130AC87-25D1-435F-9DC9-AC4CFE7CA503}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A130AC87-25D1-435F-9DC9-AC4CFE7CA503}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DAD9668-67B6-42B6-B0F9-CEAEE49A500A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DAD9668-67B6-42B6-B0F9-CEAEE49A500A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DAD9668-67B6-42B6-B0F9-CEAEE49A500A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DAD9668-67B6-42B6-B0F9-CEAEE49A500A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

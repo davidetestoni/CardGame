@@ -1,4 +1,4 @@
-﻿namespace CardGame.Server.Instances.Game
+﻿namespace CardGame.Shared.Enums
 {
     public enum GameStatus
     {

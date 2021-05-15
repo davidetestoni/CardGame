@@ -92,6 +92,21 @@ namespace CardGame.Server.Networking
             return this;
         }
 
+        public void BroadcastMessage(string message, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
+        {
+            foreach (var peer in peerIds.Keys)
+            {
+                SendMessage(message, peer, deliveryMethod);
+            }
+        }
+
+        public void SendMessage(string message, NetPeer peer, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
+        {
+            NetDataWriter writer = new NetDataWriter();
+            writer.Put(message);
+            peer.Send(writer, DeliveryMethod.ReliableOrdered);
+        }
+
         public void Close()
         {
             worker.CancelAsync();

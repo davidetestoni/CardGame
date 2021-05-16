@@ -94,16 +94,17 @@ namespace CardGame.Server.Networking
 
         public void BroadcastMessage(string message, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
         {
-            foreach (var peer in peerIds.Keys)
+            foreach (var peerId in peerIds.Values)
             {
-                SendMessage(message, peer, deliveryMethod);
+                SendMessage(message, peerId, deliveryMethod);
             }
         }
 
-        public void SendMessage(string message, NetPeer peer, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
+        public void SendMessage(string message, Guid peerId, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
         {
             NetDataWriter writer = new NetDataWriter();
             writer.Put(message);
+            var peer = peerIds.First(p => p.Value == peerId).Key;
             peer.Send(writer, DeliveryMethod.ReliableOrdered);
         }
 

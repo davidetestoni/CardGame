@@ -235,9 +235,11 @@ namespace CardGame.Server.Instances.Game
         /// <summary>
         /// Attacks the enemy player directly
         /// </summary>
-        public GameInstance AttackPlayer(PlayerInstance player, CreatureCardInstance attacker, PlayerInstance target)
+        public GameInstance AttackPlayer(PlayerInstance player, CreatureCardInstance attacker)
         {
             ThrowIfNotPlayerTurn(player);
+
+            var target = Opponent;
 
             // If the card has no attacks left
             if (attacker.AttacksLeft == 0)

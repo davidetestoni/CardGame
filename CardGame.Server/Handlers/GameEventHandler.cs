@@ -5,6 +5,7 @@ using CardGame.Shared.Messages.Server.Cards.Creatures;
 using CardGame.Shared.Messages.Server.Game;
 using CardGame.Shared.Messages.Server.Players;
 using LiteNetLib;
+using System;
 using System.Linq;
 
 namespace CardGame.Server.Handlers
@@ -232,6 +233,12 @@ namespace CardGame.Server.Handlers
         {
             var serialized = ServerMessageSerializer.Serialize(message);
             server.BroadcastMessage(serialized, deliveryMethod);
+        }
+
+        public void SendMessage(ServerMessage message, Guid playerId, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
+        {
+            var serialized = ServerMessageSerializer.Serialize(message);
+            server.SendMessage(serialized, playerId, deliveryMethod);
         }
     }
 }

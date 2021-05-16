@@ -9,6 +9,18 @@ namespace SampleGame.Server.Logging
             => AnsiConsole.MarkupLine("[white][[{0}]] [[Info]] {1}[/]",
                 DateTime.Now, Markup.Escape(message));
 
+        public static void FormattedInfo(string message)
+            => AnsiConsole.MarkupLine("[white][[{0}]] [[Info]] {1}[/]",
+                DateTime.Now, message);
+
+        public static void GameEvent(string message)
+            => AnsiConsole.MarkupLine("[dodgerblue1][[{0}]] [[Game Event]] {1}[/]",
+                DateTime.Now, Markup.Escape(message));
+
+        public static void FormattedGameEvent(string message)
+            => AnsiConsole.MarkupLine("[dodgerblue1][[{0}]] [[Game Event]] {1}[/]",
+                DateTime.Now, message);
+
         public static void Warning(string message)
             => AnsiConsole.MarkupLine("[darkorange][[{0}]] [[Warning]] {1}[/]",
                 DateTime.Now, Markup.Escape(message));

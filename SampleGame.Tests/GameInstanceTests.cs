@@ -47,13 +47,8 @@ namespace SampleGame.Tests
 
             game.Start();
 
-            var player1HandSize = game.CurrentPlayer == game.PlayerOne
-                ? game.Options.InitialHandSize + 1
-                : game.Options.InitialHandSize;
-
-            var player2HandSize = game.CurrentPlayer == game.PlayerTwo
-                ? game.Options.InitialHandSize + 1
-                : game.Options.InitialHandSize;
+            var player1HandSize = game.Options.InitialHandSize + 1;
+            var player2HandSize = game.Options.InitialHandSize + 1;
 
             Assert.Equal(player1HandSize, game.PlayerOne.Hand.Count);
             Assert.Equal(player2HandSize, game.PlayerTwo.Hand.Count);
@@ -286,7 +281,7 @@ namespace SampleGame.Tests
 
             // Attack the opponent
             var soldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
-            game.AttackPlayer(game.CurrentPlayer, soldier, game.Opponent);
+            game.AttackPlayer(game.CurrentPlayer, soldier);
 
             Assert.Equal(game.Opponent.InitialHealth - soldier.Attack, game.Opponent.CurrentHealth);
             Assert.Equal(0, soldier.AttacksLeft);

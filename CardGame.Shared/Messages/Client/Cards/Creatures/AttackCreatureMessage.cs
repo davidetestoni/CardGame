@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CardGame.Shared.Messages.Client
+namespace CardGame.Shared.Messages.Client.Cards.Creatures
 {
     /// <summary>
     /// Message that relays information about an attack.

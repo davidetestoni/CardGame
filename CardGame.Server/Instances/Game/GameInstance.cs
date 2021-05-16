@@ -539,12 +539,12 @@ namespace CardGame.Server.Instances.Game
 
             return this;
         }
+
+        public PlayerInstance GetOpponent(PlayerInstance player)
+            => player == CurrentPlayer ? Opponent : CurrentPlayer;
         #endregion
 
         #region Private Methods
-        private PlayerInstance GetOpponent(PlayerInstance player)
-            => player == CurrentPlayer ? Opponent : CurrentPlayer;
-
         private void ThrowIfNotPlayerTurn(PlayerInstance player)
         {
             if (player != CurrentPlayer)

@@ -54,8 +54,12 @@ namespace CardGame.Server.Handlers
                         game.EndTurn(player);
                         break;
 
+                    case SurrenderMessage x:
+                        game.Surrender(player);
+                        break;
+
                     default:
-                        throw new NotImplementedException();
+                        break; // Not a game-related message, we can ignore it
                 }
             }
             catch (Exception ex)

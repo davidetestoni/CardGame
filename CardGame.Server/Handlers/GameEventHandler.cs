@@ -61,10 +61,20 @@ namespace CardGame.Server.Handlers
                 var message = new CardsDrawnMessage
                 {
                     PlayerId = e.Player.Id,
-                    NewCards = e.NewCards.Select(c => new DrawnCardDTO { Id = c.Id, ShortName = c.ShortName }).ToList()
+                    NewCards = e.NewCards.Select(c => new DrawnCardDTO { Id = c.Id, ShortName = c.ShortName }).ToList(),
+                    DeckSize = e.Player.Deck.Count
                 };
 
-                BroadcastMessage(message);
+                SendMessage(message, e.Player.Id);
+
+                var opponentMessage = new CardsDrawnOpponentMessage
+                {
+                    PlayerId = e.Player.Id,
+                    Amount = e.NewCards.Count,
+                    DeckSize = e.Player.Deck.Count
+                };
+
+                SendMessage(message, game.GetOpponent(e.Player).Id);
             };
             #endregion
 

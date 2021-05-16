@@ -6,6 +6,9 @@ using CardGame.Shared.Models.Cards;
 using CardGame.Shared.Models.Players;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Linq;
+using CardGame.Shared.Attributes;
 
 namespace CardGame.Server.Factories
 {
@@ -14,6 +17,22 @@ namespace CardGame.Server.Factories
     /// </summary>
     public class PlayerInstanceFactory
     {
+        private readonly List<Card> _cards;
+
+        /// <summary>
+        /// Creates a factory basing on the cards declared in an <paramref name="assembly"/>.
+        /// </summary>
+        public PlayerInstanceFactory(Assembly assembly)
+        {
+            _cards = new List<Card>();
+
+            foreach (var type in assembly.GetTypes().Where(t => IsPlayableCard(t)))
+            {
+                var card = (Card)Activator.CreateInstance(type);
+                _cards.Add(card);
+            }
+        }
+
         /// <summary>
         /// Creates a <see cref="PlayerInstance"/> basing on a <paramref name="player"/>.
         /// </summary>
@@ -21,7 +40,7 @@ namespace CardGame.Server.Factories
         {
             var instance = new PlayerInstance
             {
-                Id = Guid.NewGuid(),
+                Id = player.Id,
                 Name = player.Name,
                 CurrentMana = 0,
                 MaximumMana = 0,
@@ -34,9 +53,9 @@ namespace CardGame.Server.Factories
 
             foreach (var definition in player.Deck)
             {
-                for (var i = 0; i < definition.Item2; i++)
+                for (var i = 0; i < definition.Value; i++)
                 {
-                    deck.Add(definition.Item1);
+                    deck.Add(_cards.First(c => c.ShortName == definition.Key));
                 }
             }
 
@@ -48,5 +67,8 @@ namespace CardGame.Server.Factories
 
             return instance;
         }
+
+        private static bool IsPlayableCard(Type type)
+            => type.CustomAttributes.Any(a => a.AttributeType == typeof(PlayableCard));
     }
 }

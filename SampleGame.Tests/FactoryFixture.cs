@@ -1,6 +1,5 @@
 ﻿using CardGame.Server.Factories;
 using CardGame.Server.Instances.Game;
-using CardGame.Shared.Models.Cards;
 using CardGame.Shared.Models.Players;
 using SampleGame.Cards.Creatures;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ namespace SampleGame.Tests
         public FactoryFixture()
         {
             CardFactory = new(typeof(BasicSoldier).Assembly);
-            PlayerFactory = new();
+            PlayerFactory = new(typeof(BasicSoldier).Assembly);
             GameFactory = new(CardFactory, PlayerFactory);
         }
 
@@ -39,9 +38,9 @@ namespace SampleGame.Tests
             => new()
             {
                 Name = name,
-                Deck = new List<(Card, int)>
+                Deck = new Dictionary<string, int>
                 {
-                    (new BasicSoldier(), deckSize)
+                    { "BasicSoldier", deckSize }
                 }
             };
 
@@ -62,11 +61,11 @@ namespace SampleGame.Tests
             => new()
             {
                 Name = name,
-                Deck = new List<(Card, int)>
+                Deck = new Dictionary<string, int>
                 {
-                    (new BasicSoldier(), 4),
-                    (new Gunner(), 3),
-                    (new Defender(), 3)
+                    { "BasicSoldier", 4 },
+                    { "Gunner", 3 },
+                    { "Defender", 3 }
                 }
             };
     }

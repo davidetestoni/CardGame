@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace CardGame.Shared.Messages.Server.Game
 {
-    public class CardsDrawnMessage : ServerMessage
+    public class CardsDrawnOpponentMessage : ServerMessage
     {
         /// <summary>
         /// The id of the player that drew the cards.
@@ -11,9 +10,9 @@ namespace CardGame.Shared.Messages.Server.Game
         public Guid PlayerId { get; set; }
 
         /// <summary>
-        /// The cards that were drawn.
+        /// How many cards were drawn.
         /// </summary>
-        public List<DrawnCardDTO> NewCards { get; set; }
+        public int Amount { get; set; }
 
         /// <summary>
         /// The new deck size after the draw.

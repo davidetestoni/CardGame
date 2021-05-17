@@ -14,13 +14,11 @@ namespace CardGame.Client.Handlers
     public class GameEventHandler
     {
         private readonly GameInstance game;
-        private readonly CardInstanceFactory cardInstanceFactory;
 
-        public GameEventHandler(GameInstance game, CardInstanceFactory cardInstanceFactory, ServerMessageHandler serverMessageHandler)
+        public GameEventHandler(GameInstance game, ServerMessageHandler serverMessageHandler)
         {
             serverMessageHandler.MessageReceived += (sender, message) => Handle(message);
             this.game = game;
-            this.cardInstanceFactory = cardInstanceFactory;
         }
 
         private void Handle(ServerMessage message)
@@ -30,105 +28,87 @@ namespace CardGame.Client.Handlers
                 #region Game
                 case GameStartedMessage x:
                     var opponent = x.Players.First(p => p.Key != game.Me.Id);
-                    game.Opponent.Id = opponent.Key;
-                    game.Opponent.Name = opponent.Value.Name;
-                    game.MyTurn = x.CurrentPlayerId == game.Me.Id;
-                    game.Status = GameStatus.Started;
+                    game.StartGame(opponent.Key, opponent.Value, x.CurrentPlayerId);
                     break;
 
                 case GameEndedMessage x:
-                    game.Winner = game.GetPlayer(x.WinnerId);
-                    game.Surrendered = x.Surrender;
+                    game.EndGame(x.WinnerId, x.Surrender);
                     break;
 
                 case NewTurnMessage x:
-                    game.MyTurn = x.CurrentPlayerId == game.Me.Id;
-                    game.TurnNumber = x.TurnNumber;
+                    game.ChangeTurn(x.CurrentPlayerId, x.TurnNumber);
                     break;
 
                 case CardsDrawnMessage x:
-                    foreach (var card in x.NewCards)
-                    {
-                        var instance = cardInstanceFactory.Create(card.ShortName, card.Id);
-                        game.Me.Hand.Add(instance);
-                    }
+                    game.DrawCards(x.NewCards);
                     break;
 
                 case CardsDrawnOpponentMessage x:
-                    game.Opponent.HandSize += x.Amount;
-                    game.Opponent.DeckSize = x.DeckSize;
+                    game.DrawCardsOpponent(x.Amount);
                     break;
                 #endregion
 
                 #region Player
                 case PlayerAttackedMessage x:
-                    game.GetPlayer(x.PlayerId).CurrentHealth -= x.Damage;
+                    game.AttackPlayer(x.AttackerId, x.PlayerId, x.Damage);
                     break;
 
                 case PlayerDamagedMessage x:
-                    game.GetPlayer(x.PlayerId).CurrentHealth -= x.Damage;
+                    game.DamagePlayer(x.PlayerId, x.Damage);
                     break;
 
                 case PlayerHealthRestoredMessage x:
-                    game.GetPlayer(x.PlayerId).CurrentHealth += x.Amount;
+                    game.RestorePlayerHealth(x.PlayerId, x.Amount);
                     break;
 
                 case PlayerManaRestoredMessage x:
-                    game.GetPlayer(x.PlayerId).CurrentMana += x.Amount;
+                    game.RestorePlayerMana(x.PlayerId, x.Amount);
                     break;
 
                 case PlayerManaSpentMessage x:
-                    game.GetPlayer(x.PlayerId).CurrentMana -= x.Amount;
+                    game.SpendPlayerMana(x.PlayerId, x.Amount);
                     break;
 
                 case PlayerMaxManaIncreasedMessage x:
-                    game.GetPlayer(x.PlayerId).MaximumMana += x.Increment;
+                    game.IncreasePlayerMaxMana(x.PlayerId, x.Increment);
                     break;
                 #endregion
 
                 #region Creatures
-                case CreatureAttackedMessage x:
-                    game.GetCreatureOnField(x.AttackerId).Health -= x.RecoilDamage;
-                    game.GetCreatureOnField(x.DefenderId).Health -= x.Damage;
+                case CreatureAttackChangedMessage x:
+                    game.ChangeCreatureAttack(x.CreatureId, x.NewValue);
                     break;
 
-                case CreatureAttackChangedMessage x:
-                    game.GetCreatureOnField(x.CreatureId).Attack = x.NewValue;
+                case CreatureAttackedMessage x:
+                    game.AttackCreature(x.AttackerId, x.DefenderId, x.Damage, x.RecoilDamage);
                     break;
 
                 case CreatureAttacksLeftChangedMessage x:
-                    game.GetCreatureOnField(x.CreatureId).CanAttack = x.CanAttack;
+                    game.ChangeCreatureAttacksLeft(x.CreatureId, x.CanAttack);
                     break;
 
                 case CreatureDamagedMessage x:
-                    game.GetCreatureOnField(x.TargetId).Health -= x.Damage;
+                    game.DamageCreature(x.TargetId, x.Damage);
                     break;
 
                 case CreatureDestroyedMessage x:
-                    var creatureToDestroy = game.GetCreatureOnField(x.CreatureId);
-                    creatureToDestroy.Owner.Field.Remove(creatureToDestroy);
-                    creatureToDestroy.Owner.Graveyard.Add(creatureToDestroy.Base);
+                    game.DestroyCreature(x.CreatureId);
                     break;
 
                 case CreatureHealthIncreasedMessage x:
-                    game.GetCreatureOnField(x.CreatureId).Health += x.Amount;
+                    game.IncreaseCreatureHealth(x.CreatureId, x.Amount);
                     break;
 
                 case CreaturePlayedMessage x:
-                    var creature = game.GetCardInHand(x.CreatureId) as CreatureCardInstance;
-                    game.Me.Hand.Remove(creature);
-                    game.Me.Field.Add(creature);
+                    game.PlayCreature(x.CreatureId);
                     break;
 
                 case CreaturePlayedOpponentMessage x:
-                    creature = cardInstanceFactory.Create(x.ShortName, x.CreatureId) as CreatureCardInstance;
-                    game.Opponent.HandSize--;
-                    game.Opponent.Field.Add(creature);
+                    game.PlayCreatureOpponent(x.ShortName, x.CreatureId);
                     break;
 
                 case CreatureSpawnedMessage x:
-                    creature = cardInstanceFactory.Create(x.ShortName, x.CreatureId) as CreatureCardInstance;
-                    game.GetPlayer(x.PlayerId).Field.Add(creature);
+                    game.SpawnCreature(x.ShortName, x.CreatureId, x.PlayerId);
                     break;
                 #endregion
             }

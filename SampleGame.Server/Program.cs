@@ -4,23 +4,24 @@ using CardGame.Server.Handlers;
 using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
 using CardGame.Server.Networking;
+using CardGame.Shared.DTOs;
 using CardGame.Shared.Messages.Client;
 using CardGame.Shared.Messages.Client.System;
 using CardGame.Shared.Messages.Server.System;
-using CardGame.Shared.Models.Cards;
 using CardGame.Shared.Models.Players;
 using SampleGame.Cards.Creatures;
 using SampleGame.Server.Logging;
 using Spectre.Console;
 using System;
-using System.Collections.Generic;
 
 namespace SampleGame.Server
 {
     class Program
     {
+        private static GameInstanceOptions gameOptions;
         private static GameInstance game;
         private static ClientMessageHandler clientMessageHandler;
+        private static ServerMessageHandler serverMessageHandler;
         private static GameEventHandler gameEventHandler;
         private static PlayerActionHandler playerActionHandler;
         private static GameServer server;
@@ -30,9 +31,12 @@ namespace SampleGame.Server
         {
             var port = 9050;
 
+            // TODO: Deserialize this from a json file
+            gameOptions = new GameInstanceOptions();
+
             clientMessageHandler = new ClientMessageHandler();
             server = new GameServer(clientMessageHandler).Start(port);
-            
+            serverMessageHandler = new ServerMessageHandler(server);
 
             Log.Info($"Server started on port {port}");
 
@@ -66,11 +70,16 @@ namespace SampleGame.Server
                     if (playerOne == null)
                     {
                         playerOne = new Player { Name = x.PlayerName, Deck = x.Deck, Id = x.PlayerId };
-                        gameEventHandler.BroadcastMessage(new JoinGameResponse
+                        serverMessageHandler.SendMessage(new JoinGameResponse
                         {
-                            PlayerId = x.PlayerId
-                        });
-                        Log.Info($"Player {playerOne.Id} ([darkorange]{playerOne.Name}[/]) joined");
+                            PlayerId = x.PlayerId,
+                            GameInfo = new GameInfoDTO
+                            {
+                                InitialHealth = gameOptions.InitialHealth,
+                                FieldSize = gameOptions.FieldSize
+                            }
+                        }, x.PlayerId);
+                        Log.FormattedInfo($"Player {playerOne.Id} ([darkorange]{playerOne.Name}[/]) joined");
                     }
                     else if (playerTwo == null)
                     {
@@ -81,11 +90,16 @@ namespace SampleGame.Server
                         else
                         {
                             playerTwo = new Player { Name = x.PlayerName, Deck = x.Deck, Id = x.PlayerId };
-                            gameEventHandler.BroadcastMessage(new JoinGameResponse
+                            serverMessageHandler.SendMessage(new JoinGameResponse
                             {
-                                PlayerId = x.PlayerId
-                            });
-                            Log.Info($"Player {playerTwo.Id} ([darkorange]{playerTwo.Name}[/]) joined");
+                                PlayerId = x.PlayerId,
+                                GameInfo = new GameInfoDTO
+                                {
+                                    InitialHealth = gameOptions.InitialHealth,
+                                    FieldSize = gameOptions.FieldSize
+                                }
+                            }, x.PlayerId);
+                            Log.FormattedInfo($"Player {playerTwo.Id} ([darkorange]{playerTwo.Name}[/]) joined");
 
                             // We have 2 players so we can start the game
                             StartGame();
@@ -112,12 +126,10 @@ namespace SampleGame.Server
             var playerFactory = new PlayerInstanceFactory(typeof(BasicSoldier).Assembly);
             var gameFactory = new GameInstanceFactory(cardFactory, playerFactory);
 
-            var gameOptions = new GameInstanceOptions();
-
             game = gameFactory.Create(gameOptions, playerOne, playerTwo);
 
-            gameEventHandler = new GameEventHandler(game, server);
-            playerActionHandler = new PlayerActionHandler(game, clientMessageHandler, gameEventHandler);
+            gameEventHandler = new GameEventHandler(game, serverMessageHandler);
+            playerActionHandler = new PlayerActionHandler(game, clientMessageHandler, serverMessageHandler);
 
             HookGameEvents();
             game.Start();
@@ -221,6 +233,6 @@ namespace SampleGame.Server
         }
 
         private static void SendError(string error, Guid playerId)
-            => gameEventHandler.SendMessage(new ErrorResponse { Error = error }, playerId);
+            => serverMessageHandler.SendMessage(new ErrorResponse { Error = error }, playerId);
     }
 }

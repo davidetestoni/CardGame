@@ -15,6 +15,7 @@ namespace CardGame.Shared.Messages.Client
 
         /// <summary>
         /// The id of the player that sent the message.
+        /// Do not set this in the client, the server will take care of it.
         /// </summary>
         [JsonIgnore]
         public Guid PlayerId { get; set; }

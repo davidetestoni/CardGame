@@ -12,12 +12,12 @@ namespace CardGame.Server.Handlers
     public class PlayerActionHandler
     {
         private readonly GameInstance game;
-        private readonly GameEventHandler gameEventHandler;
+        private readonly ServerMessageHandler serverMessageHandler;
 
-        public PlayerActionHandler(GameInstance game, ClientMessageHandler messageHandler,GameEventHandler gameEventHandler)
+        public PlayerActionHandler(GameInstance game, ClientMessageHandler messageHandler, ServerMessageHandler serverMessageHandler)
         {
             this.game = game;
-            this.gameEventHandler = gameEventHandler;
+            this.serverMessageHandler = serverMessageHandler;
             messageHandler.MessageReceived += HandleMessage;
         }
 
@@ -65,7 +65,7 @@ namespace CardGame.Server.Handlers
             catch (Exception ex)
             {
                 var errorMessage = new ErrorResponse { Error = ex.Message };
-                gameEventHandler.SendMessage(errorMessage, message.PlayerId);
+                serverMessageHandler.SendMessage(errorMessage, message.PlayerId);
             }
         }
 

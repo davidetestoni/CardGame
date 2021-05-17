@@ -1,6 +1,9 @@
-﻿using LiteNetLib;
+﻿using CardGame.Client.Handlers;
+using LiteNetLib;
+using LiteNetLib.Utils;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 
 namespace CardGame.Client.Networking
@@ -10,17 +13,30 @@ namespace CardGame.Client.Networking
         private EventBasedNetListener listener;
         private NetManager client;
         private BackgroundWorker worker;
+        private readonly ServerMessageHandler serverMessageHandler;
 
         public event EventHandler<string> MessageReceived;
+        public event EventHandler Connected;
+
+        public GameClient(ServerMessageHandler serverMessageHandler)
+        {
+            this.serverMessageHandler = serverMessageHandler;
+        }
 
         public GameClient Connect(string host, int port, string key)
         {
             listener = new EventBasedNetListener();
 
+            listener.PeerConnectedEvent += peer =>
+            {
+                Connected?.Invoke(this, EventArgs.Empty);
+            };
+
             listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod) =>
             {
                 var message = dataReader.GetString(10000);
                 MessageReceived?.Invoke(this, message);
+                serverMessageHandler.Handle(message);
                 dataReader.Recycle();
             };
 
@@ -36,6 +52,14 @@ namespace CardGame.Client.Networking
             worker.RunWorkerAsync();
 
             return this;
+        }
+
+        public void SendMessage(string message, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
+        {
+            NetDataWriter writer = new NetDataWriter();
+            writer.Put(message);
+            var server = client.ConnectedPeerList.First();
+            server.Send(writer, deliveryMethod);
         }
 
         public void Close()

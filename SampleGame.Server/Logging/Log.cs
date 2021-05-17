@@ -34,10 +34,10 @@ namespace SampleGame.Server.Logging
 
         public static void ClientMessage(string message, Guid client)
             => AnsiConsole.MarkupLine("[turquoise2][[{0}]] [[{1} -> Server]] {2}[/]",
-                DateTime.Now, client, message);
+                DateTime.Now, client, Markup.Escape(message));
 
         public static void ServerMessage(string message, Guid client)
            => AnsiConsole.MarkupLine("[darkolivegreen2][[{0}]] [[Server -> {1}]] {2}[/]",
-                DateTime.Now, client, message);
+                DateTime.Now, client, Markup.Escape(message));
     }
 }

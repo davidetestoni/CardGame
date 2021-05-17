@@ -105,7 +105,7 @@ namespace CardGame.Server.Networking
             NetDataWriter writer = new NetDataWriter();
             writer.Put(message);
             var peer = peerIds.First(p => p.Value == peerId).Key;
-            peer.Send(writer, DeliveryMethod.ReliableOrdered);
+            peer.Send(writer, deliveryMethod);
         }
 
         public void Close()

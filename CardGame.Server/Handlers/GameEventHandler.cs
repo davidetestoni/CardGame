@@ -17,12 +17,12 @@ namespace CardGame.Server.Handlers
     public class GameEventHandler
     {
         private readonly GameInstance game;
-        private readonly GameServer server;
+        private readonly ServerMessageHandler serverMessageHandler;
 
-        public GameEventHandler(GameInstance game, GameServer server)
+        public GameEventHandler(GameInstance game, ServerMessageHandler serverMessageHandler)
         {
             this.game = game;
-            this.server = server;
+            this.serverMessageHandler = serverMessageHandler;
 
             #region Game Events
             game.GameStarted += (sender, e) =>
@@ -32,7 +32,7 @@ namespace CardGame.Server.Handlers
                     CurrentPlayerId = e.CurrentPlayer.Id
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.GameEnded += (sender, e) =>
@@ -42,7 +42,7 @@ namespace CardGame.Server.Handlers
                     WinnerId = e.Winner.Id
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.NewTurn += (sender, e) =>
@@ -53,28 +53,26 @@ namespace CardGame.Server.Handlers
                     TurnNumber = e.TurnNumber
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.CardsDrawn += (sender, e) =>
             {
                 var message = new CardsDrawnMessage
                 {
-                    PlayerId = e.Player.Id,
                     NewCards = e.NewCards.Select(c => new DrawnCardDTO { Id = c.Id, ShortName = c.ShortName }).ToList(),
                     DeckSize = e.Player.Deck.Count
                 };
 
-                SendMessage(message, e.Player.Id);
+                serverMessageHandler.SendMessage(message, e.Player.Id);
 
                 var opponentMessage = new CardsDrawnOpponentMessage
                 {
-                    PlayerId = e.Player.Id,
                     Amount = e.NewCards.Count,
                     DeckSize = e.Player.Deck.Count
                 };
 
-                SendMessage(message, game.GetOpponent(e.Player).Id);
+                serverMessageHandler.SendMessage(message, game.GetOpponent(e.Player).Id);
             };
             #endregion
 
@@ -88,7 +86,7 @@ namespace CardGame.Server.Handlers
                     Damage = e.Damage
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.PlayerDamaged += (sender, e) =>
@@ -99,7 +97,7 @@ namespace CardGame.Server.Handlers
                     Damage = e.Damage
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.PlayerHealthRestored += (sender, e) =>
@@ -110,7 +108,7 @@ namespace CardGame.Server.Handlers
                     Amount = e.Amount
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.PlayerManaSpent += (sender, e) =>
@@ -121,7 +119,7 @@ namespace CardGame.Server.Handlers
                     Amount = e.Amount
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.PlayerManaRestored += (sender, e) =>
@@ -132,7 +130,7 @@ namespace CardGame.Server.Handlers
                     Amount = e.Amount
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.PlayerMaxManaIncreased += (sender, e) =>
@@ -143,7 +141,7 @@ namespace CardGame.Server.Handlers
                     Increment = e.Increment
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
             #endregion
 
@@ -158,7 +156,7 @@ namespace CardGame.Server.Handlers
                     RecoilDamage = e.RecoilDamage
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.CreatureDamaged += (sender, e) =>
@@ -169,7 +167,7 @@ namespace CardGame.Server.Handlers
                     Damage = e.Damage
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.CreatureAttackChanged += (sender, e) =>
@@ -180,7 +178,7 @@ namespace CardGame.Server.Handlers
                     NewValue = e.NewValue
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.CreatureHealthIncreased += (sender, e) =>
@@ -191,7 +189,7 @@ namespace CardGame.Server.Handlers
                     Amount = e.Amount
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.CreatureAttacksLeftChanged += (sender, e) =>
@@ -202,7 +200,7 @@ namespace CardGame.Server.Handlers
                     CanAttack = e.CanAttack
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.CreatureDestroyed += (sender, e) =>
@@ -212,43 +210,39 @@ namespace CardGame.Server.Handlers
                     CreatureId = e.Target.Id
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.CreatureSpawned += (sender, e) =>
             {
                 var message = new CreatureSpawnedMessage
                 {
+                    PlayerId = e.Creature.Owner.Id,
                     CreatureId = e.Creature.Id,
                     ShortName = e.Creature.ShortName
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.BroadcastMessage(message);
             };
 
             game.CreaturePlayed += (sender, e) =>
             {
                 var message = new CreaturePlayedMessage
                 {
-                    PlayerId = e.Player.Id,
                     CreatureId = e.Creature.Id
                 };
 
-                BroadcastMessage(message);
+                serverMessageHandler.SendMessage(message, e.Player.Id);
+
+                var opponentMessage = new CreaturePlayedOpponentMessage
+                {
+                    CreatureId = e.Creature.Id,
+                    ShortName = e.Creature.ShortName
+                };
+
+                serverMessageHandler.SendMessage(message, game.GetOpponent(e.Player).Id);
             };
             #endregion
-        }
-
-        public void BroadcastMessage(ServerMessage message, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
-        {
-            var serialized = ServerMessageSerializer.Serialize(message);
-            server.BroadcastMessage(serialized, deliveryMethod);
-        }
-
-        public void SendMessage(ServerMessage message, Guid playerId, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
-        {
-            var serialized = ServerMessageSerializer.Serialize(message);
-            server.SendMessage(serialized, playerId, deliveryMethod);
         }
     }
 }

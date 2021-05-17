@@ -25,5 +25,10 @@ namespace CardGame.Client.Instances.Cards
         /// The base card from which this instance was created.
         /// </summary>
         public Card Base { get; set; }
+
+        /// <summary>
+        /// The shortname of this card.
+        /// </summary>
+        public string ShortName => Base.ShortName;
     }
 }

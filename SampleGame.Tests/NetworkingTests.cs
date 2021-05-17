@@ -27,5 +27,17 @@ namespace SampleGame.Tests
 
             Assert.Equal("HELLO", serverHello);
         }
+
+        [Fact]
+        public async Task StartServer_ConnectClients_GameStarts()
+        {
+
+        }
+
+        private void BootstrapServer(int port)
+        {
+            var clientMessageHandler = new CardGame.Server.Handlers.ClientMessageHandler();
+            var server = new GameServer(clientMessageHandler).Start(port);
+        }
     }
 }

@@ -73,8 +73,12 @@ namespace CardGame.Client.Instances.Game
         #region Game
         public void StartGame(Guid opponentId, PlayerInfoDTO opponentInfo, Guid currentPlayerId)
         {
-            Opponent.Id = opponentId;
-            Opponent.Name = opponentInfo.Name;
+            Opponent = new OpponentInstance
+            {
+                Id = opponentId,
+                Name = opponentInfo.Name
+            };
+
             MyTurn = currentPlayerId == Me.Id;
             Status = GameStatus.Started;
 

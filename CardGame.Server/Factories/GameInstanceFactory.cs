@@ -16,6 +16,15 @@ namespace CardGame.Server.Factories
             _playerFactory = playerFactory;
         }
 
+        public GameInstance Create(GameInstanceOptions options)
+        {
+            return new GameInstance(_cardFactory)
+            {
+                Id = Guid.NewGuid(),
+                Options = options
+            };
+        }
+
         public GameInstance Create(GameInstanceOptions options, Player playerOne, Player playerTwo)
         {
             return new GameInstance(_cardFactory)
@@ -27,7 +36,7 @@ namespace CardGame.Server.Factories
             };
         }
 
-        private PlayerInstance CreatePlayer(GameInstanceOptions options, Player player)
+        public PlayerInstance CreatePlayer(GameInstanceOptions options, Player player)
         {
             var instance = _playerFactory.Create(player);
             instance.InitialHealth = options.InitialHealth;

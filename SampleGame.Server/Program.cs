@@ -1,14 +1,7 @@
 ﻿using CardGame.Server.Events.Game;
-using CardGame.Server.Factories;
-using CardGame.Server.Handlers;
 using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
 using CardGame.Server.Networking;
-using CardGame.Shared.DTOs;
-using CardGame.Shared.Messages.Client;
-using CardGame.Shared.Messages.Client.System;
-using CardGame.Shared.Messages.Server.System;
-using CardGame.Shared.Models.Players;
 using SampleGame.Cards.Creatures;
 using SampleGame.Server.Logging;
 using Spectre.Console;
@@ -18,153 +11,71 @@ namespace SampleGame.Server
 {
     class Program
     {
-        private static GameInstanceOptions gameOptions;
-        private static GameInstance game;
-        private static ClientMessageHandler clientMessageHandler;
-        private static ServerMessageHandler serverMessageHandler;
-        private static GameEventHandler gameEventHandler;
-        private static PlayerActionHandler playerActionHandler;
-        private static GameServer server;
-        private static Player playerOne, playerTwo;
+        private static SingleGameServer server;
 
         static void Main(string[] args)
         {
             var port = 9050;
 
             // TODO: Deserialize this from a json file
-            gameOptions = new GameInstanceOptions();
+            var gameOptions = new GameInstanceOptions();
+            var assembly = typeof(BasicSoldier).Assembly;
 
-            clientMessageHandler = new ClientMessageHandler();
-            server = new GameServer(clientMessageHandler).Start(port);
-            serverMessageHandler = new ServerMessageHandler(server);
+            server = new SingleGameServer(port, gameOptions, assembly);
+            Log.Info($"Server started on port {port} with assembly {assembly.GetName().Name}");
 
-            Log.Info($"Server started on port {port}");
+            server.InnerServer.ClientConnected += (sender, client)
+                => Log.Info($"Client {client} connected");
 
-            server.ClientConnected += (sender, client) =>
-            {
-                Log.Info($"Client {client} connected");
-            };
+            server.InnerServer.MessageReceived += (sender, message)
+                => Log.ClientMessage(message.Body, message.SenderId);
 
-            server.MessageReceived += (sender, message) =>
-            {
-                Log.ClientMessage(message.Body, message.SenderId);
-            };
+            server.ClientMessageHandler.InvalidMessageReceived += (sender, message) 
+                => Log.Error($"Invalid message: {message.Body}");
 
-            clientMessageHandler.InvalidMessageReceived += (sender, message) =>
-            {
-                Log.Error($"Invalid message: {message.Body}");
-            };
+            server.ClientMessageHandler.Exception += (sender, ex)
+                => Log.Exception(ex);
 
-            clientMessageHandler.MessageReceived += (sender, message) => HandleMessage(message);
+            server.PlayerJoined += (sender, player)
+                => Log.FormattedInfo($"Player {player.Id} ([darkorange]{player.Name}[/]) joined");
 
-            Log.Info($"Key: {server.Key}");
+            BindGameEvents();
+
+            Log.Info($"Key: {server.InnerServer.Key}");
             Log.Info("Waiting for players to join...");
             Console.ReadLine();
         }
 
-        private static void HandleMessage(ClientMessage message)
+        private static void BindGameEvents()
         {
-            switch (message)
-            {
-                case JoinGameRequest x:
-                    if (playerOne == null)
-                    {
-                        playerOne = new Player { Name = x.PlayerName, Deck = x.Deck, Id = x.PlayerId };
-                        serverMessageHandler.SendMessage(new JoinGameResponse
-                        {
-                            PlayerId = x.PlayerId,
-                            GameInfo = new GameInfoDTO
-                            {
-                                InitialHealth = gameOptions.InitialHealth,
-                                FieldSize = gameOptions.FieldSize
-                            }
-                        }, x.PlayerId);
-                        Log.FormattedInfo($"Player {playerOne.Id} ([darkorange]{playerOne.Name}[/]) joined");
-                    }
-                    else if (playerTwo == null)
-                    {
-                        if (playerOne.Id == x.PlayerId)
-                        {
-                            SendError("You already joined this game", x.PlayerId);
-                        }
-                        else
-                        {
-                            playerTwo = new Player { Name = x.PlayerName, Deck = x.Deck, Id = x.PlayerId };
-                            serverMessageHandler.SendMessage(new JoinGameResponse
-                            {
-                                PlayerId = x.PlayerId,
-                                GameInfo = new GameInfoDTO
-                                {
-                                    InitialHealth = gameOptions.InitialHealth,
-                                    FieldSize = gameOptions.FieldSize
-                                }
-                            }, x.PlayerId);
-                            Log.FormattedInfo($"Player {playerTwo.Id} ([darkorange]{playerTwo.Name}[/]) joined");
-
-                            // We have 2 players so we can start the game
-                            StartGame();
-                        }
-                    }
-                    else
-                    {
-                        if (playerOne.Id == x.PlayerId || playerTwo.Id == x.PlayerId)
-                        {
-                            SendError("You already joined this game", x.PlayerId);
-                        }
-                        else
-                        {
-                            SendError("Game full, two players already joined", x.PlayerId);
-                        }
-                    }
-                    break;
-            }
-        }
-
-        private static void StartGame()
-        {
-            var cardFactory = new CardInstanceFactory(typeof(BasicSoldier).Assembly);
-            var playerFactory = new PlayerInstanceFactory(typeof(BasicSoldier).Assembly);
-            var gameFactory = new GameInstanceFactory(cardFactory, playerFactory);
-
-            game = gameFactory.Create(gameOptions, playerOne, playerTwo);
-
-            gameEventHandler = new GameEventHandler(game, serverMessageHandler);
-            playerActionHandler = new PlayerActionHandler(game, clientMessageHandler, serverMessageHandler);
-
-            HookGameEvents();
-            game.Start();
-        }
-
-        private static void HookGameEvents()
-        {
-            game.GameStarted += (sender, e) => Log.FormattedGameEvent($"Game started. [darkorange]{e.CurrentPlayer.Name}[/] goes first");
-            game.GameEnded += (sender, e) => Log.FormattedGameEvent($"Game ended. The winner is [darkorange]{e.Winner.Name}[/]");
-            game.NewTurn += (sender, e) =>
+            server.Game.GameStarted += (sender, e) => Log.FormattedGameEvent($"Game started. [darkorange]{e.CurrentPlayer.Name}[/] goes first");
+            server.Game.GameEnded += (sender, e) => Log.FormattedGameEvent($"Game ended. The winner is [darkorange]{e.Winner.Name}[/]");
+            server.Game.NewTurn += (sender, e) =>
             {
                 if (e.TurnNumber != 1)
                 {
                     Log.FormattedGameEvent($"Turn ended. [darkorange]{e.CurrentPlayer.Name}[/]'s turn began");
                 }
 
-                LogBoard(game);
+                LogBoard();
             };
 
-            game.CardsDrawn += (sender, e) => LogCardsDrawn(e);
+            server.Game.CardsDrawn += (sender, e) => LogCardsDrawn(e);
 
-            game.PlayerAttacked += (sender, e) => Log.FormattedGameEvent($"[red]{e.Attacker.ShortName}[/] attacked [darkorange]{e.Player.Name}[/] and dealt [greenyellow]{e.Damage}[/] damage");
-            game.PlayerDamaged += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/] received [greenyellow]{e.Damage}[/] damage");
-            game.PlayerHealthRestored += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/]'s health restored by [greenyellow]{e.Amount}[/] (health: [greenyellow]{e.Player.CurrentHealth}[/])");
-            game.PlayerManaRestored += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/]'s mana restored by [greenyellow]{e.Amount}[/] (mana: [greenyellow]{e.Player.CurrentMana} / {e.Player.MaximumMana}[/])");
-            game.PlayerManaSpent += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/] spent [greenyellow]{e.Amount}[/] mana (mana: [greenyellow]{e.Player.CurrentMana} / {e.Player.MaximumMana}[/])");
-            game.PlayerMaxManaIncreased += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/]'s maximum mana increased by [greenyellow]{e.Increment}[/] (mana: [greenyellow]{e.Player.CurrentMana} / {e.Player.MaximumMana}[/])");
+            server.Game.PlayerAttacked += (sender, e) => Log.FormattedGameEvent($"[red]{e.Attacker.ShortName}[/] attacked [darkorange]{e.Player.Name}[/] and dealt [greenyellow]{e.Damage}[/] damage");
+            server.Game.PlayerDamaged += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/] received [greenyellow]{e.Damage}[/] damage");
+            server.Game.PlayerHealthRestored += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/]'s health restored by [greenyellow]{e.Amount}[/] (health: [greenyellow]{e.Player.CurrentHealth}[/])");
+            server.Game.PlayerManaRestored += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/]'s mana restored by [greenyellow]{e.Amount}[/] (mana: [greenyellow]{e.Player.CurrentMana} / {e.Player.MaximumMana}[/])");
+            server.Game.PlayerManaSpent += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/] spent [greenyellow]{e.Amount}[/] mana (mana: [greenyellow]{e.Player.CurrentMana} / {e.Player.MaximumMana}[/])");
+            server.Game.PlayerMaxManaIncreased += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/]'s maximum mana increased by [greenyellow]{e.Increment}[/] (mana: [greenyellow]{e.Player.CurrentMana} / {e.Player.MaximumMana}[/])");
 
-            game.CreatureAttacked += (sender, e) => Log.FormattedGameEvent($"[red]{e.Attacker.ShortName}[/] attacked [darkorange]{e.Defender.ShortName}[/], dealt [greenyellow]{e.Damage}[/] damage and received [greenyellow]{e.RecoilDamage}[/] recoil damage");
-            game.CreatureAttackChanged += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Creature.ShortName}[/]'s attack changed to [greenyellow]{e.NewValue}[/]");
-            game.CreatureDamaged += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Target.ShortName}[/] took [greenyellow]{e.Damage}[/] damage");
-            game.CreatureDestroyed += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Target.ShortName}[/] was destroyed");
-            game.CreatureHealthIncreased += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Creature.ShortName}[/]'s health was increased by [greenyellow]{e.Amount}[/]");
-            game.CreaturePlayed += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/] played [darkorange]{e.Creature.ShortName}[/] from their hand");
-            game.CreatureSpawned += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Creature.ShortName}[/] spawned on [darkorange]{e.Creature.Owner.Name}[/]'s field");
+            server.Game.CreatureAttacked += (sender, e) => Log.FormattedGameEvent($"[red]{e.Attacker.ShortName}[/] attacked [darkorange]{e.Defender.ShortName}[/], dealt [greenyellow]{e.Damage}[/] damage and received [greenyellow]{e.RecoilDamage}[/] recoil damage");
+            server.Game.CreatureAttackChanged += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Creature.ShortName}[/]'s attack changed to [greenyellow]{e.NewValue}[/]");
+            server.Game.CreatureDamaged += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Target.ShortName}[/] took [greenyellow]{e.Damage}[/] damage");
+            server.Game.CreatureDestroyed += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Target.ShortName}[/] was destroyed");
+            server.Game.CreatureHealthIncreased += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Creature.ShortName}[/]'s health was increased by [greenyellow]{e.Amount}[/]");
+            server.Game.CreaturePlayed += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/] played [darkorange]{e.Creature.ShortName}[/] from their hand");
+            server.Game.CreatureSpawned += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Creature.ShortName}[/] spawned on [darkorange]{e.Creature.Owner.Name}[/]'s field");
         }
 
         private static void LogCardsDrawn(CardsDrawnEvent e)
@@ -183,16 +94,16 @@ namespace SampleGame.Server
             AnsiConsole.WriteLine();
         }
 
-        private static void LogBoard(GameInstance game)
+        private static void LogBoard()
         {
             AnsiConsole.WriteLine();
-            LogHand(game.PlayerOne);
+            LogHand(server.Game.PlayerOne);
             AnsiConsole.WriteLine();
-            LogField(game.PlayerOne);
+            LogField(server.Game.PlayerOne);
             AnsiConsole.WriteLine();
-            LogHand(game.PlayerTwo);
+            LogHand(server.Game.PlayerTwo);
             AnsiConsole.WriteLine();
-            LogField(game.PlayerTwo);
+            LogField(server.Game.PlayerTwo);
             AnsiConsole.WriteLine();
         }
 
@@ -231,8 +142,5 @@ namespace SampleGame.Server
 
             AnsiConsole.Render(table);
         }
-
-        private static void SendError(string error, Guid playerId)
-            => serverMessageHandler.SendMessage(new ErrorResponse { Error = error }, playerId);
     }
 }

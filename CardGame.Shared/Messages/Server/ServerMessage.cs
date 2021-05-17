@@ -7,9 +7,6 @@ namespace CardGame.Shared.Messages.Server
     /// </summary>
     public abstract class ServerMessage
     {
-        /// <summary>
-        /// The unique id of the message.
-        /// </summary>
-        public Guid Id { get; set; }
+        
     }
 }

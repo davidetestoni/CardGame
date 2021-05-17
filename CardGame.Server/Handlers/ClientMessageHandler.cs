@@ -12,6 +12,7 @@ namespace CardGame.Server.Handlers
 
         public event EventHandler<ClientMessageWrapper> InvalidMessageReceived;
         public event EventHandler<ClientMessage> MessageReceived;
+        public event EventHandler<Exception> Exception;
 
         public void Handle(string str, Guid senderId)
         {
@@ -24,10 +25,13 @@ namespace CardGame.Server.Handlers
                 message.PlayerId = senderId;
                 MessageReceived?.Invoke(this, message);
             }
-            catch
+            catch (JsonException)
             {
                 InvalidMessageReceived?.Invoke(this, new ClientMessageWrapper(str, senderId));
-                return;
+            }
+            catch (Exception ex)
+            {
+                Exception?.Invoke(this, ex);
             }
         }
     }

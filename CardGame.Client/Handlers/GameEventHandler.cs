@@ -1,12 +1,10 @@
-﻿using CardGame.Client.Factories;
-using CardGame.Client.Instances.Cards;
-using CardGame.Client.Instances.Game;
-using CardGame.Client.Instances.Players;
-using CardGame.Shared.Enums;
+﻿using CardGame.Client.Instances.Game;
 using CardGame.Shared.Messages.Server;
 using CardGame.Shared.Messages.Server.Cards.Creatures;
 using CardGame.Shared.Messages.Server.Game;
 using CardGame.Shared.Messages.Server.Players;
+using CardGame.Shared.Messages.Server.System;
+using System;
 using System.Linq;
 
 namespace CardGame.Client.Handlers
@@ -14,6 +12,8 @@ namespace CardGame.Client.Handlers
     public class GameEventHandler
     {
         private readonly GameInstance game;
+        
+        public event EventHandler<string> Error;
 
         public GameEventHandler(GameInstance game, ServerMessageHandler serverMessageHandler)
         {
@@ -111,6 +111,10 @@ namespace CardGame.Client.Handlers
                     game.SpawnCreature(x.ShortName, x.CreatureId, x.PlayerId);
                     break;
                 #endregion
+
+                case ErrorResponse x:
+                    Error?.Invoke(this, x.Error);
+                    break;
             }
         }
     }

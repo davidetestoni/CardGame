@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CardGame.Shared.Messages.Server.Game
 {
@@ -7,7 +8,7 @@ namespace CardGame.Shared.Messages.Server.Game
         /// <summary>
         /// The cards that were drawn.
         /// </summary>
-        public List<DrawnCardDTO> NewCards { get; set; }
+        public List<Guid> NewCards { get; set; }
 
         /// <summary>
         /// The new deck size after the draw.

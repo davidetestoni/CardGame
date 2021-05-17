@@ -14,6 +14,6 @@ namespace CardGame.Client.Instances.Players
         /// <summary>
         /// The cards in the deck.
         /// </summary>
-        public List<Card> Deck { get; set; }
+        public List<CardInstance> Deck { get; set; }
     }
 }

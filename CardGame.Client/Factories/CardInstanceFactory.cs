@@ -14,20 +14,19 @@ namespace CardGame.Client.Factories
     /// </summary>
     public class CardInstanceFactory
     {
-        private readonly Dictionary<Card, Type> _cards;
+        private readonly List<Card> _cards;
 
         /// <summary>
         /// Creates a factory basing on the cards declared in an <paramref name="assembly"/>.
         /// </summary>
         public CardInstanceFactory(Assembly assembly)
         {
-            _cards = new Dictionary<Card, Type>();
+            _cards = new List<Card>();
 
             foreach (var type in assembly.GetTypes().Where(t => IsPlayableCard(t)))
             {
                 var card = (Card)Activator.CreateInstance(type);
-                var attr = type.GetCustomAttribute<PlayableCard>();
-                _cards.Add(card, attr.InstanceType);
+                _cards.Add(card);
             }
         }
 
@@ -35,13 +34,13 @@ namespace CardGame.Client.Factories
         /// Create a <see cref="CardInstance"/> from a <paramref name="shortName"/> and an <paramref name="id"/>.
         /// </summary>
         public CardInstance Create(string shortName, Guid id)
-            => Create(_cards.Keys.First(c => c.ShortName == shortName), id);
+            => Create(_cards.First(c => c.ShortName == shortName), id);
 
         /// <summary>
         /// Create a <see cref="CardInstance"/> from a base card of type <typeparamref name="T"/> and an <paramref name="id"/>.
         /// </summary>
         public CardInstance Create<T>(Guid id) where T : Card
-            => Create(_cards.Keys.First(c => c is T), id);
+            => Create(_cards.First(c => c is T), id);
 
         private CardInstance Create(Card card, Guid id)
         {
@@ -62,12 +61,13 @@ namespace CardGame.Client.Factories
 
         private CreatureCardInstance CreateCreature(CreatureCard card)
         {
-            var type = _cards[card];
-            var instance = (CreatureCardInstance)Activator.CreateInstance(type);
-
-            instance.Attack = card.Attack;
-            instance.Health = card.Health;
-            instance.Features = CardFeature.None;
+            var instance = new CreatureCardInstance
+            {
+                Base = card,
+                Attack = card.Attack,
+                Health = card.Health,
+                Features = CardFeature.None
+            };
 
             if (HasAttribute<Taunt>(card.GetType())) instance.Features |= CardFeature.Taunt;
             if (HasAttribute<Rush>(card.GetType())) instance.Features |= CardFeature.Rush;

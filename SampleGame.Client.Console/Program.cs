@@ -1,20 +1,14 @@
 ﻿using CardGame.Client.Events.Game;
-using CardGame.Client.Factories;
-using CardGame.Client.Handlers;
 using CardGame.Client.Instances.Cards;
-using CardGame.Client.Instances.Game;
 using CardGame.Client.Instances.Players;
 using CardGame.Client.Models.PlayerActions.Cards.Creatures;
 using CardGame.Client.Models.PlayerActions.Game;
 using CardGame.Client.Networking;
 using CardGame.Shared.Enums;
-using CardGame.Shared.Messages.Client.System;
-using CardGame.Shared.Messages.Server.System;
 using CardGame.Shared.Models.Players;
 using SampleGame.Cards.Creatures;
 using SampleGame.Client.Console.Logging;
 using Spectre.Console;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -24,9 +18,14 @@ namespace SampleGame.Client.Console
     class Program
     {
         private static SingleGameClient client;
+        private static bool justEndedTurn;
 
         static void Main(string[] args)
         {
+            System.Console.Title = "Client";
+            var logReceivedMessages = false;
+            var logSentMessages = false;
+
             var host = "127.0.0.1";
             var port = 9050;
 
@@ -45,28 +44,42 @@ namespace SampleGame.Client.Console
             client.GameJoined += (sender, playerId)
                 => AnsiConsole.MarkupLine($"Game joined. My id is [darkorange]{playerId}[/]");
 
-            client.InnerClient.MessageReceived += (sender, message)
-                => Log.ServerMessage(message);
+            if (logReceivedMessages)
+            {
+                client.InnerClient.MessageReceived += (sender, message)
+                    => Log.ServerMessage(message);
+            }
+
+            if (logSentMessages)
+            {
+                client.InnerClient.MessageSent += (sender, message)
+                    => Log.ClientMessage(message);
+            }
+
+            client.ServerMessageHandler.InvalidMessageReceived += (sender, message)
+                => Log.Error($"Invalid message: {message}");
+
+            client.ServerMessageHandler.Exception += (sender, ex)
+                => Log.Exception(ex);
 
             client.GameEventHandler.Error += (sender, e) => Log.Error(e);
 
             var key = AnsiConsole.Ask<string>("Key");
             player.Name = AnsiConsole.Ask<string>("Name");
+            System.Console.Title = $"Client - {player.Name}";
 
             client.InnerClient.Connect(host, port, key);
 
             Log.Info("Waiting for the game to start...");
             while (client.Game.Status == GameStatus.Created)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
             }
 
-            while (client.Game.Status == GameStatus.Created)
+            while (client.Game.Status == GameStatus.Started)
             {
-                if (client.Game.MyTurn)
+                if (client.Game.MyTurn && !justEndedTurn)
                 {
-                    // HACK: Needed to avoid waiting for another action after the turn ended
-                    Thread.Sleep(500);
                     ProcessPlayerAction();
                 }
                 else
@@ -74,6 +87,8 @@ namespace SampleGame.Client.Console
                     Thread.Sleep(100);
                 }
             }
+
+            System.Console.ReadLine();
         }
 
         private static void BindGameEvents()
@@ -81,12 +96,17 @@ namespace SampleGame.Client.Console
             client.Game.GameStarted += (sender, e) => 
             {
                 Log.FormattedGameEvent($"Game started. Your opponent is [darkorange]{client.Game.Opponent.Name}[/]. [darkorange]{e.CurrentPlayer.Name}[/] goes first");
+
+                AnsiConsole.WriteLine();
+                LogDeck();
+                AnsiConsole.WriteLine();
             };
             client.Game.GameEnded += (sender, e) => Log.FormattedGameEvent($"Game ended, [darkorange]{e.Winner.Name}[/] is the winner");
             client.Game.NewTurn += (sender, e) =>
             {
                 Log.FormattedGameEvent($"Turn ended. [darkorange]{e.CurrentPlayer.Name}[/] plays the next turn");
                 LogBoard();
+                justEndedTurn = false;
             };
             client.Game.CardsDrawn += (sender, e) => LogCardsDrawn(e);
             client.Game.CardsDrawnOpponent += (sender, e) => Log.FormattedGameEvent($"[darkorange]{client.Game.Opponent.Name}[/] drew [greenyellow]{e.Amount}[/] card(s)");
@@ -120,6 +140,7 @@ namespace SampleGame.Client.Console
 
         private static void ProcessPlayerAction()
         {
+            CHOOSEACTION:
             var choice = MultipleChoiceInt("What do you want to do?", new List<string>
             {
                 "Play card from hand",
@@ -133,6 +154,10 @@ namespace SampleGame.Client.Console
             {
                 case 0:
                     var card = MultipleChoiceCard("Select the card", client.Game.Me.Hand);
+                    if (card == null)
+                    {
+                        goto CHOOSEACTION;
+                    }
                     client.PlayerActionHandler.PerformAction(new PlayCardAction
                     {
                         Card = card
@@ -141,6 +166,10 @@ namespace SampleGame.Client.Console
 
                 case 1:
                     var attacker = MultipleChoiceCreature("Select the attacker", client.Game.Me.Field.Where(c => c.CanAttack));
+                    if (attacker == null)
+                    {
+                        goto CHOOSEACTION;
+                    }
                     client.PlayerActionHandler.PerformAction(new AttackPlayerAction
                     {
                         Attacker = attacker
@@ -148,8 +177,17 @@ namespace SampleGame.Client.Console
                     break;
 
                 case 2:
+                    CHOOSECREATURE:
                     attacker = MultipleChoiceCreature("Select the attacker", client.Game.Me.Field.Where(c => c.CanAttack));
+                    if (attacker == null)
+                    {
+                        goto CHOOSEACTION;
+                    }
                     var target = MultipleChoiceCreature("Select the target", client.Game.Opponent.Field);
+                    if (target == null)
+                    {
+                        goto CHOOSECREATURE;
+                    }
                     client.PlayerActionHandler.PerformAction(new AttackCreatureAction
                     {
                         Attacker = attacker,
@@ -159,12 +197,28 @@ namespace SampleGame.Client.Console
 
                 case 3:
                     client.PlayerActionHandler.PerformAction(new EndTurnAction());
+                    justEndedTurn = true;
                     break;
 
                 case 4:
                     client.PlayerActionHandler.PerformAction(new SurrenderAction());
                     break;
             }
+        }
+
+        private static void LogDeck()
+        {
+            AnsiConsole.MarkupLine($"[darkorange]My[/] deck");
+
+            var table = new Table()
+                .AddColumn("[darkorange]ShortName[/]")
+                .AddColumn("[greenyellow]Id[/]");
+
+            client.Game.Me.Deck.ForEach(c => table.AddRow(
+                c.ShortName,
+                c.Id.ToString()));
+
+            AnsiConsole.Render(table);
         }
 
         private static void LogCardsDrawn(CardsDrawnEvent e)
@@ -184,7 +238,7 @@ namespace SampleGame.Client.Console
 
         private static void LogField(PlayerInstance player)
         {
-            var name = player == client.Game.Me ? "[darkorange]Your[/]" : "[darkorange]{player.Name}[/]'s";
+            var name = player == client.Game.Me ? "[darkorange]Your[/]" : $"[darkorange]{player.Name}[/]'s";
             AnsiConsole.MarkupLine($"{name} field");
 
             var table = new Table()
@@ -235,7 +289,10 @@ namespace SampleGame.Client.Console
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more options)[/]")
                     .AddChoices(choices)
-                    .UseConverter(card => $"[darkorange]{card.Base.Name}[/]"));
+                    .AddChoice(null)
+                    .UseConverter(card => card == null
+                        ? "Back"
+                        : $"[darkorange]{card.Base.Name}[/]"));
 
         private static CreatureCardInstance MultipleChoiceCreature(string title, IEnumerable<CreatureCardInstance> choices)
             => AnsiConsole.Prompt(
@@ -244,6 +301,9 @@ namespace SampleGame.Client.Console
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more options)[/]")
                     .AddChoices(choices)
-                    .UseConverter(card => $"[darkorange]{card.Base.Name}[/] [red]{card.Health}[/] [dodgerblue1]{card.Attack}[/]"));
+                    .AddChoice(null)
+                    .UseConverter(card => card == null 
+                        ? "Back"
+                        : $"[darkorange]{card.Base.Name}[/] [red]{card.Health}[/] [dodgerblue1]{card.Attack}[/]"));
     }
 }

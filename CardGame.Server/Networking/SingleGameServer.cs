@@ -23,7 +23,6 @@ namespace CardGame.Server.Networking
         public GameServer InnerServer { get; private set; }
 
         private readonly CardInstanceFactory cardInstanceFactory;
-        private readonly PlayerInstanceFactory playerInstanceFactory;
         private readonly GameInstanceFactory gameInstanceFactory;
 
         public event EventHandler<PlayerInstance> PlayerJoined;
@@ -40,8 +39,7 @@ namespace CardGame.Server.Networking
             ServerMessageHandler = new ServerMessageHandler(InnerServer);
 
             cardInstanceFactory = new CardInstanceFactory(cardsAssembly);
-            playerInstanceFactory = new PlayerInstanceFactory(cardsAssembly);
-            gameInstanceFactory = new GameInstanceFactory(cardInstanceFactory, playerInstanceFactory);
+            gameInstanceFactory = new GameInstanceFactory(cardInstanceFactory);
 
             Game = gameInstanceFactory.Create(options);
             GameEventHandler = new GameEventHandler(Game, ServerMessageHandler);
@@ -55,7 +53,7 @@ namespace CardGame.Server.Networking
                 case JoinGameRequest x:
                     if (Game.PlayerOne == null)
                     {
-                        Game.PlayerOne = gameInstanceFactory.CreatePlayer(Game.Options, new Player
+                        Game.PlayerOne = gameInstanceFactory.CreatePlayer(Game, new Player
                         {
                             Name = x.PlayerName,
                             Deck = x.Deck,
@@ -80,7 +78,7 @@ namespace CardGame.Server.Networking
                         }
                         else
                         {
-                            Game.PlayerTwo = gameInstanceFactory.CreatePlayer(Game.Options, new Player
+                            Game.PlayerTwo = gameInstanceFactory.CreatePlayer(Game, new Player
                             {
                                 Name = x.PlayerName,
                                 Deck = x.Deck,

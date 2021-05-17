@@ -11,6 +11,7 @@ namespace CardGame.Client.Handlers
 
         public event EventHandler<string> InvalidMessageReceived;
         public event EventHandler<ServerMessage> MessageReceived;
+        public event EventHandler<Exception> Exception;
 
         public void Handle(string str)
         {
@@ -22,10 +23,13 @@ namespace CardGame.Client.Handlers
                 message = JsonConvert.DeserializeObject<ServerMessage>(str, jsonSettings);
                 MessageReceived?.Invoke(this, message);
             }
-            catch
+            catch (JsonException)
             {
                 InvalidMessageReceived?.Invoke(this, str);
-                return;
+            }
+            catch (Exception ex)
+            {
+                Exception?.Invoke(this, ex);
             }
         }
     }

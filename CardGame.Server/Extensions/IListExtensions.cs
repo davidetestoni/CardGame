@@ -5,7 +5,7 @@ namespace CardGame.Server.Extensions
 {
     public static class IListExtensions
     {
-        public static void Shuffle<T>(this IList<T> list, Random rng)
+        public static IList<T> Shuffle<T>(this IList<T> list, Random rng)
         {
             int n = list.Count;
             while (n > 1)
@@ -16,6 +16,8 @@ namespace CardGame.Server.Extensions
                 list[k] = list[n];
                 list[n] = value;
             }
+
+            return list;
         }
 
         public static T GetRandom<T>(this IList<T> list, Random rng)

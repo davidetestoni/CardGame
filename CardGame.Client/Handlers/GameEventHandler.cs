@@ -5,7 +5,6 @@ using CardGame.Shared.Messages.Server.Game;
 using CardGame.Shared.Messages.Server.Players;
 using CardGame.Shared.Messages.Server.System;
 using System;
-using System.Linq;
 
 namespace CardGame.Client.Handlers
 {
@@ -27,8 +26,7 @@ namespace CardGame.Client.Handlers
             {
                 #region Game
                 case GameStartedMessage x:
-                    var opponent = x.Players.First(p => p.Key != game.Me.Id);
-                    game.StartGame(opponent.Key, opponent.Value, x.CurrentPlayerId);
+                    game.StartGame(x.OpponentId, x.OpponentInfo, x.MyTurn, x.Deck);
                     break;
 
                 case GameEndedMessage x:

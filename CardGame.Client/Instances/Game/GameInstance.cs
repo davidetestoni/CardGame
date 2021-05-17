@@ -6,7 +6,6 @@ using CardGame.Client.Instances.Cards;
 using CardGame.Client.Instances.Players;
 using CardGame.Shared.DTOs;
 using CardGame.Shared.Enums;
-using CardGame.Shared.Messages.Server.Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,20 +70,34 @@ namespace CardGame.Client.Instances.Game
         }
 
         #region Game
-        public void StartGame(Guid opponentId, PlayerInfoDTO opponentInfo, Guid currentPlayerId)
+        public void StartGame(Guid opponentId, OpponentInfoDTO opponentInfo, bool myTurn, List<CardInfoDTO> deck)
         {
             Opponent = new OpponentInstance
             {
                 Id = opponentId,
-                Name = opponentInfo.Name
+                Name = opponentInfo.Name,
+                DeckSize = opponentInfo.DeckSize
             };
 
-            MyTurn = currentPlayerId == Me.Id;
+            MyTurn = myTurn;
+            Me.Deck = ConvertDeck(deck);
+
             Status = GameStatus.Started;
+
+            PlayerInstance currentPlayer;
+
+            if (myTurn)
+            {
+                currentPlayer = Me;
+            }
+            else
+            {
+                currentPlayer = Opponent;
+            }
 
             GameStarted?.Invoke(this, new GameStartedEvent
             {
-                CurrentPlayer = GetPlayer(currentPlayerId)
+                CurrentPlayer = currentPlayer
             });
         }
 
@@ -113,15 +126,15 @@ namespace CardGame.Client.Instances.Game
             });
         }
 
-        public void DrawCards(List<DrawnCardDTO> newCards)
+        public void DrawCards(List<Guid> newCards)
         {
             var instances = new List<CardInstance>();
 
             foreach (var card in newCards)
             {
-                var instance = cardInstanceFactory.Create(card.ShortName, card.Id);
+                var instance = GetCardInDeck(card);
                 instances.Add(instance);
-                Me.Deck.Remove(Me.Deck.First(c => c.ShortName == card.ShortName));
+                Me.Deck.Remove(instance);
             }
 
             Me.Hand.AddRange(instances);
@@ -293,7 +306,7 @@ namespace CardGame.Client.Instances.Game
 
         public void PlayCreature(Guid creatureId)
         {
-            var creature = GetCreatureOnField(creatureId);
+            var creature = GetCardInHand(creatureId) as CreatureCardInstance;
             Me.Hand.Remove(creature);
             Me.Field.Add(creature);
 
@@ -338,10 +351,51 @@ namespace CardGame.Client.Instances.Game
                 return creature;
             }
 
-            return Opponent.Field.First(c => c.Id == id);
+            creature = Opponent.Field.First(c => c.Id == id);
+
+            if (creature == null)
+            {
+                throw new Exception($"No creature found with id {id}");
+            }
+
+            return creature;
         }
 
         private CardInstance GetCardInHand(Guid id)
-            => Me.Hand.FirstOrDefault(c => c.Id == id);
+        {
+            var card = Me.Hand.FirstOrDefault(c => c.Id == id);
+
+            if (card == null)
+            {
+                throw new Exception($"No card found with id {id}");
+            }
+
+            return card;
+        }
+
+        private CardInstance GetCardInDeck(Guid id)
+        {
+            var card = Me.Deck.FirstOrDefault(c => c.Id == id);
+
+            if (card == null)
+            {
+                throw new Exception($"No card found with id {id}");
+            }
+
+            return card;
+        }
+
+        private List<CardInstance> ConvertDeck(List<CardInfoDTO> cards)
+        {
+            var deck = new List<CardInstance>();
+
+            foreach (var card in cards)
+            {
+                var instance = cardInstanceFactory.Create(card.ShortName, card.Id);
+                deck.Add(instance);
+            }
+
+            return deck;
+        }
     }
 }

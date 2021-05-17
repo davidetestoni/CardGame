@@ -2,7 +2,6 @@
 using CardGame.Server.Events.Cards.Creatures;
 using CardGame.Server.Events.Game;
 using CardGame.Server.Events.Players;
-using CardGame.Server.Factories;
 using CardGame.Server.Instances.Players;
 using CardGame.Server.Instances.Cards;
 using CardGame.Shared.Enums;
@@ -14,8 +13,6 @@ namespace CardGame.Server.Instances.Game
 {
     public class GameInstance
     {
-        private readonly CardInstanceFactory _cardFactory;
-
         #region Public Properties
         public Guid Id { get; set; }
 
@@ -68,15 +65,6 @@ namespace CardGame.Server.Instances.Game
         public event EventHandler<CreatureAttackChangedEvent> CreatureAttackChanged;
         #endregion
 
-        /// <summary>
-        /// Creates a <see cref="GameInstance"/> given a <paramref name="cardFactory"/>.
-        /// </summary>
-        /// <param name="cardFactory"></param>
-        public GameInstance(CardInstanceFactory cardFactory)
-        {
-            _cardFactory = cardFactory;
-        }
-
         #region Public Methods
         /// <summary>
         /// Randomly selects the current player, draws the initial hands and starts the game.
@@ -85,6 +73,7 @@ namespace CardGame.Server.Instances.Game
         {
             // Randomly select a player who gets to play first
             CurrentPlayer = Random.Next() % 2 == 0 ? PlayerOne : PlayerTwo;
+            GameStarted?.Invoke(this, new GameStartedEvent { CurrentPlayer = CurrentPlayer });
 
             // Set max and current mana to 1
             IncreaseMaxMana(CurrentPlayer, 1);
@@ -98,7 +87,6 @@ namespace CardGame.Server.Instances.Game
             DrawCards(CurrentPlayer, 1, DrawEventSource.TurnStart);
 
             Status = GameStatus.Started;
-            GameStarted?.Invoke(this, new GameStartedEvent { CurrentPlayer = CurrentPlayer });
             NewTurn?.Invoke(this, new NewTurnEvent { CurrentPlayer = CurrentPlayer, TurnNumber = TurnNumber });
 
             return this;
@@ -303,9 +291,8 @@ namespace CardGame.Server.Instances.Game
                     // If it fits, put it in hand
                     if (player.Hand.Count < Options.MaximumHandSize)
                     {
-                        var instance = (CreatureCardInstance)_cardFactory.Create(card.ShortName, this, player);
-                        newCards.Add(instance);
-                        player.Hand.Add(instance);
+                        newCards.Add(card);
+                        player.Hand.Add(card);
                     }
                     // Otherwise send it to the graveyard
                     else
@@ -329,7 +316,7 @@ namespace CardGame.Server.Instances.Game
         public GameInstance DestroyCreature(CardInstance destroyer, CreatureCardInstance target)
         {
             target.Owner.Field.Remove(target);
-            target.Owner.Graveyard.Add(target.Base);
+            target.Owner.Graveyard.Add(target);
 
             NotifyAll(c => c.OnCardDestroyed(destroyer, target));
 

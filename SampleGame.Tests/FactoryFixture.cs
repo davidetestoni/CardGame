@@ -9,14 +9,12 @@ namespace SampleGame.Tests
     public class FactoryFixture
     {
         public CardInstanceFactory CardFactory { get; private set; }
-        public PlayerInstanceFactory PlayerFactory { get; private set; }
         public GameInstanceFactory GameFactory { get; private set; }
 
         public FactoryFixture()
         {
             CardFactory = new(typeof(BasicSoldier).Assembly);
-            PlayerFactory = new(typeof(BasicSoldier).Assembly);
-            GameFactory = new(CardFactory, PlayerFactory);
+            GameFactory = new(CardFactory);
         }
 
         /// <summary>

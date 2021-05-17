@@ -16,6 +16,7 @@ namespace CardGame.Client.Networking
         private readonly ServerMessageHandler serverMessageHandler;
 
         public event EventHandler<string> MessageReceived;
+        public event EventHandler<string> MessageSent;
         public event EventHandler Connected;
 
         public GameClient(ServerMessageHandler serverMessageHandler)
@@ -60,6 +61,7 @@ namespace CardGame.Client.Networking
             writer.Put(message);
             var server = client.ConnectedPeerList.First();
             server.Send(writer, deliveryMethod);
+            MessageSent?.Invoke(this, message);
         }
 
         public void Close()

@@ -98,7 +98,7 @@ namespace CardGame.Server.Handlers
 
         private CardInstance GetCardInHand(Guid cardId, PlayerInstance player)
         {
-            foreach (var card in player.Field)
+            foreach (var card in player.Hand)
             {
                 if (card.Id == cardId)
                 {

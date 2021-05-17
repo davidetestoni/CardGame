@@ -5,6 +5,10 @@ namespace SampleGame.Client.Console.Logging
 {
     public static class Log
     {
+        public static void Debug(string message)
+            => AnsiConsole.MarkupLine("[grey][[{0}]] [[Debug]] {1}[/]",
+                DateTime.Now, Markup.Escape(message));
+
         public static void Info(string message)
             => AnsiConsole.MarkupLine("[white][[{0}]] [[Info]] {1}[/]",
                 DateTime.Now, Markup.Escape(message));

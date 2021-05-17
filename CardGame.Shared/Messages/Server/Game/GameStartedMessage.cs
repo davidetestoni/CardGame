@@ -7,13 +7,23 @@ namespace CardGame.Shared.Messages.Server.Game
     public class GameStartedMessage : ServerMessage
     {
         /// <summary>
-        /// The player that goes first.
+        /// Whether it's the player's turn.
         /// </summary>
-        public Guid CurrentPlayerId { get; set; }
+        public bool MyTurn { get; set; }
 
         /// <summary>
-        /// The player ids and their info.
+        /// The id of the opponent.
         /// </summary>
-        public Dictionary<Guid, PlayerInfoDTO> Players { get; set; }
+        public Guid OpponentId { get; set; }
+
+        /// <summary>
+        /// The info of the opponent.
+        /// </summary>
+        public OpponentInfoDTO OpponentInfo { get; set; }
+
+        /// <summary>
+        /// The cards in the deck (in random order).
+        /// </summary>
+        public List<CardInfoDTO> Deck { get; set; }
     }
 }

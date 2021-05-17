@@ -24,6 +24,7 @@ namespace CardGame.Server.Networking
         
         public event EventHandler<Guid> ClientConnected;
         public event EventHandler<ClientMessageWrapper> MessageReceived;
+        public event EventHandler<ClientMessageWrapper> MessageSent;
 
         public GameServer(ClientMessageHandler clientMessageHandler)
         {
@@ -106,6 +107,7 @@ namespace CardGame.Server.Networking
             writer.Put(message);
             var peer = peerIds.First(p => p.Value == peerId).Key;
             peer.Send(writer, deliveryMethod);
+            MessageSent?.Invoke(this, new ClientMessageWrapper(message, peerId));
         }
 
         public void Close()

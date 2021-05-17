@@ -1,24 +1,25 @@
-﻿using CardGame.Server.Instances.Game;
+﻿using CardGame.Server.Extensions;
+using CardGame.Server.Instances.Cards;
+using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
 using CardGame.Shared.Models.Players;
 using System;
+using System.Collections.Generic;
 
 namespace CardGame.Server.Factories
 {
     public class GameInstanceFactory
     {
-        private readonly CardInstanceFactory _cardFactory;
-        private readonly PlayerInstanceFactory _playerFactory;
+        private readonly CardInstanceFactory cardInstanceFactory;
 
-        public GameInstanceFactory(CardInstanceFactory cardFactory, PlayerInstanceFactory playerFactory)
+        public GameInstanceFactory(CardInstanceFactory cardInstanceFactory)
         {
-            _cardFactory = cardFactory;
-            _playerFactory = playerFactory;
+            this.cardInstanceFactory = cardInstanceFactory;
         }
 
         public GameInstance Create(GameInstanceOptions options)
         {
-            return new GameInstance(_cardFactory)
+            return new GameInstance()
             {
                 Id = Guid.NewGuid(),
                 Options = options
@@ -27,20 +28,43 @@ namespace CardGame.Server.Factories
 
         public GameInstance Create(GameInstanceOptions options, Player playerOne, Player playerTwo)
         {
-            return new GameInstance(_cardFactory)
+            var game = new GameInstance()
             {
                 Id = Guid.NewGuid(),
-                Options = options,
-                PlayerOne = CreatePlayer(options, playerOne),
-                PlayerTwo = CreatePlayer(options, playerTwo)
+                Options = options
             };
+
+            game.PlayerOne = CreatePlayer(game, playerOne);
+            game.PlayerTwo = CreatePlayer(game, playerTwo);
+
+            return game;
         }
 
-        public PlayerInstance CreatePlayer(GameInstanceOptions options, Player player)
+        public PlayerInstance CreatePlayer(GameInstance game, Player player)
         {
-            var instance = _playerFactory.Create(player);
-            instance.InitialHealth = options.InitialHealth;
-            instance.CurrentHealth = options.InitialHealth;
+            var instance = new PlayerInstance
+            {
+                Id = player.Id,
+                Name = player.Name,
+                InitialHealth = game.Options.InitialHealth,
+                CurrentHealth = game.Options.InitialHealth
+            };
+
+            var deck = new List<CardInstance>();
+
+            foreach (var definition in player.Deck)
+            {
+                for (var i = 0; i < definition.Value; i++)
+                {
+                    deck.Add(cardInstanceFactory.Create(definition.Key, game, instance));
+                }
+            }
+
+            // Try to use a somewhat random seed to prevent shuffling the decks of the
+            // two players in the same exact way.
+            var random = new Random(instance.Id.GetHashCode());
+            deck.Shuffle(random);
+            instance.Deck = deck;
 
             return instance;
         }

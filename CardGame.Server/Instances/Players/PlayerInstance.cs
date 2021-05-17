@@ -17,32 +17,32 @@ namespace CardGame.Server.Instances.Players
         /// <summary>
         /// The cards in the hand.
         /// </summary>
-        public List<CardInstance> Hand { get; set; }
+        public List<CardInstance> Hand { get; set; } = new List<CardInstance>();
 
         /// <summary>
         /// The cards in the deck.
         /// </summary>
-        public List<Card> Deck { get; set; }
+        public List<CardInstance> Deck { get; set; }
 
         /// <summary>
         /// The cards in the graveyard.
         /// </summary>
-        public List<Card> Graveyard { get; set; }
+        public List<CardInstance> Graveyard { get; set; } = new List<CardInstance>();
 
         /// <summary>
         /// The cards on the field.
         /// </summary>
-        public List<CreatureCardInstance> Field { get; set; }
+        public List<CreatureCardInstance> Field { get; set; } = new List<CreatureCardInstance>();
 
         /// <summary>
         /// The current amount of mana left for this turn.
         /// </summary>
-        public int CurrentMana { get; set; }
+        public int CurrentMana { get; set; } = 0;
 
         /// <summary>
         /// The maximum amount of mana for this turn.
         /// </summary>
-        public int MaximumMana { get; set; }
+        public int MaximumMana { get; set; } = 0;
 
         /// <summary>
         /// The current amount of health of the player.

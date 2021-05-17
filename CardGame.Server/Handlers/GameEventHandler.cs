@@ -1,11 +1,12 @@
-﻿using CardGame.Server.Instances.Game;
-using CardGame.Server.Networking;
+﻿using CardGame.Server.Extensions;
+using CardGame.Server.Instances.Game;
+using CardGame.Server.Instances.Players;
+using CardGame.Shared.DTOs;
 using CardGame.Shared.Messages.Server;
 using CardGame.Shared.Messages.Server.Cards.Creatures;
 using CardGame.Shared.Messages.Server.Game;
 using CardGame.Shared.Messages.Server.Players;
-using LiteNetLib;
-using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CardGame.Server.Handlers
@@ -27,12 +28,35 @@ namespace CardGame.Server.Handlers
             #region Game Events
             game.GameStarted += (sender, e) =>
             {
-                var message = new GameStartedMessage
+                // Message for player 1
+                var p1Message = new GameStartedMessage
                 {
-                    CurrentPlayerId = e.CurrentPlayer.Id
+                    MyTurn = e.CurrentPlayer.Id == game.PlayerOne.Id,
+                    OpponentId = game.PlayerTwo.Id,
+                    OpponentInfo = new OpponentInfoDTO
+                    {
+                        Name = game.PlayerTwo.Name,
+                        DeckSize = game.PlayerTwo.Deck.Count
+                    },
+                    Deck = ConvertDeck(game.PlayerOne)
                 };
 
-                serverMessageHandler.BroadcastMessage(message);
+                serverMessageHandler.SendMessage(p1Message, game.PlayerOne.Id);
+
+                // Message for player 2
+                var p2Message = new GameStartedMessage
+                {
+                    MyTurn = e.CurrentPlayer.Id == game.PlayerTwo.Id,
+                    OpponentId = game.PlayerOne.Id,
+                    OpponentInfo = new OpponentInfoDTO
+                    {
+                        Name = game.PlayerOne.Name,
+                        DeckSize = game.PlayerOne.Deck.Count
+                    },
+                    Deck = ConvertDeck(game.PlayerTwo)
+                };
+
+                serverMessageHandler.SendMessage(p2Message, game.PlayerTwo.Id);
             };
 
             game.GameEnded += (sender, e) =>
@@ -60,7 +84,7 @@ namespace CardGame.Server.Handlers
             {
                 var message = new CardsDrawnMessage
                 {
-                    NewCards = e.NewCards.Select(c => new DrawnCardDTO { Id = c.Id, ShortName = c.ShortName }).ToList(),
+                    NewCards = e.NewCards.Select(c => c.Id).ToList(),
                     DeckSize = e.Player.Deck.Count
                 };
 
@@ -72,7 +96,7 @@ namespace CardGame.Server.Handlers
                     DeckSize = e.Player.Deck.Count
                 };
 
-                serverMessageHandler.SendMessage(message, game.GetOpponent(e.Player).Id);
+                serverMessageHandler.SendMessage(opponentMessage, game.GetOpponent(e.Player).Id);
             };
             #endregion
 
@@ -240,9 +264,16 @@ namespace CardGame.Server.Handlers
                     ShortName = e.Creature.ShortName
                 };
 
-                serverMessageHandler.SendMessage(message, game.GetOpponent(e.Player).Id);
+                serverMessageHandler.SendMessage(opponentMessage, game.GetOpponent(e.Player).Id);
             };
             #endregion
         }
+
+        private List<CardInfoDTO> ConvertDeck(PlayerInstance player)
+            => player.Deck.Select(c => new CardInfoDTO
+            {
+                Id = c.Id,
+                ShortName = c.ShortName
+            }).ToList().Shuffle(game.Random).ToList();
     }
 }

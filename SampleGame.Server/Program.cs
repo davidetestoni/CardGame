@@ -15,6 +15,10 @@ namespace SampleGame.Server
 
         static void Main(string[] args)
         {
+            Console.Title = "Server";
+            var logReceivedMessages = false;
+            var logSentMessages = false;
+
             var port = 9050;
 
             // TODO: Deserialize this from a json file
@@ -27,8 +31,17 @@ namespace SampleGame.Server
             server.InnerServer.ClientConnected += (sender, client)
                 => Log.Info($"Client {client} connected");
 
-            server.InnerServer.MessageReceived += (sender, message)
-                => Log.ClientMessage(message.Body, message.SenderId);
+            if (logReceivedMessages)
+            {
+                server.InnerServer.MessageReceived += (sender, message)
+                    => Log.ClientMessage(message.Body, message.SenderId);
+            }
+
+            if (logSentMessages)
+            {
+                server.InnerServer.MessageSent += (sender, message)
+                    => Log.ServerMessage(message.Body, message.SenderId);
+            }
 
             server.ClientMessageHandler.InvalidMessageReceived += (sender, message) 
                 => Log.Error($"Invalid message: {message.Body}");
@@ -48,7 +61,16 @@ namespace SampleGame.Server
 
         private static void BindGameEvents()
         {
-            server.Game.GameStarted += (sender, e) => Log.FormattedGameEvent($"Game started. [darkorange]{e.CurrentPlayer.Name}[/] goes first");
+            server.Game.GameStarted += (sender, e) =>
+            {
+                Log.FormattedGameEvent($"Game started. [darkorange]{e.CurrentPlayer.Name}[/] goes first");
+
+                AnsiConsole.WriteLine();
+                LogDeck(server.Game.PlayerOne);
+                AnsiConsole.WriteLine();
+                LogDeck(server.Game.PlayerTwo);
+                AnsiConsole.WriteLine();
+            };
             server.Game.GameEnded += (sender, e) => Log.FormattedGameEvent($"Game ended. The winner is [darkorange]{e.Winner.Name}[/]");
             server.Game.NewTurn += (sender, e) =>
             {
@@ -76,6 +98,21 @@ namespace SampleGame.Server
             server.Game.CreatureHealthIncreased += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Creature.ShortName}[/]'s health was increased by [greenyellow]{e.Amount}[/]");
             server.Game.CreaturePlayed += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Player.Name}[/] played [darkorange]{e.Creature.ShortName}[/] from their hand");
             server.Game.CreatureSpawned += (sender, e) => Log.FormattedGameEvent($"[darkorange]{e.Creature.ShortName}[/] spawned on [darkorange]{e.Creature.Owner.Name}[/]'s field");
+        }
+
+        private static void LogDeck(PlayerInstance player)
+        {
+            AnsiConsole.MarkupLine($"[darkorange]{player.Name}[/]'s deck");
+
+            var table = new Table()
+                .AddColumn("[darkorange]ShortName[/]")
+                .AddColumn("[greenyellow]Id[/]");
+
+            player.Deck.ForEach(c => table.AddRow(
+                c.ShortName,
+                c.Id.ToString()));
+
+            AnsiConsole.Render(table);
         }
 
         private static void LogCardsDrawn(CardsDrawnEvent e)

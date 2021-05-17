@@ -69,7 +69,7 @@ namespace CardGame.Client.Networking
                     Game.Me = new MeInstance
                     {
                         Name = player.Name,
-                        Id = MyId
+                        Id = MyId,
                     };
                     GameJoined?.Invoke(this, MyId);
                     break;

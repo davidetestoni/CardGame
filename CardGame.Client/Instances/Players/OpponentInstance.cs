@@ -10,6 +10,6 @@
         /// <summary>
         /// The number of cards in the deck of the opponent.
         /// </summary>
-        public int DeckSize { get; set; }
+        public int DeckSize { get; set; } = 40;
     }
 }

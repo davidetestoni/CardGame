@@ -26,7 +26,7 @@ namespace SampleGame.Client.Console
             var logReceivedMessages = false;
             var logSentMessages = false;
 
-            var host = "127.0.0.1";
+            var host = AnsiConsole.Ask<string>("Host");
             var port = 9050;
 
             var player = new Player

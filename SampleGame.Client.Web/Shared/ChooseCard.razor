@@ -1,0 +1,14 @@
+﻿@using CardGame.Client.Instances.Cards
+
+@if (Cards != null)
+{
+    foreach (var card in Cards)
+    {
+        <button class="btn btn-primary" @onclick="(() => ModalInstance.CloseAsync(ModalResult.Ok(card)))">@card.Base.Name</button>
+    }
+}
+
+@code {
+    [CascadingParameter] public BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public IEnumerable<CardInstance> Cards { get; set; }
+}

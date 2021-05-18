@@ -30,7 +30,7 @@ namespace CardGame.Server.Handlers
                 switch (message)
                 {
                     case AttackCreatureMessage x:
-                        game.AttackCreature(player, GetCreatureOnField(x.AttackerId, player), GetCreatureOnField(x.TargetId, player));
+                        game.AttackCreature(player, GetCreatureOnField(x.AttackerId, player), GetCreatureOnField(x.TargetId, game.GetOpponent(player)));
                         break;
 
                     case AttackPlayerMessage x:

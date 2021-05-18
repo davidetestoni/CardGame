@@ -40,11 +40,11 @@ namespace CardGame.Server.Networking
             }
         }
 
-        public GameServer Start(int port)
+        public GameServer Start(string host, int port)
         {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
-            server.Start("127.0.0.1", "::1", port);
+            server.Start(host, "::1", port);
 
             Key = RandomString(8);
 

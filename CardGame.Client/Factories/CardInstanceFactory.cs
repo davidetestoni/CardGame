@@ -1,4 +1,5 @@
 ﻿using CardGame.Client.Instances.Cards;
+using CardGame.Client.Instances.Players;
 using CardGame.Shared.Attributes;
 using CardGame.Shared.Enums;
 using CardGame.Shared.Models.Cards;
@@ -33,16 +34,16 @@ namespace CardGame.Client.Factories
         /// <summary>
         /// Create a <see cref="CardInstance"/> from a <paramref name="shortName"/> and an <paramref name="id"/>.
         /// </summary>
-        public CardInstance Create(string shortName, Guid id)
-            => Create(_cards.First(c => c.ShortName == shortName), id);
+        public CardInstance Create(string shortName, Guid id, PlayerInstance owner)
+            => Create(_cards.First(c => c.ShortName == shortName), id, owner);
 
         /// <summary>
         /// Create a <see cref="CardInstance"/> from a base card of type <typeparamref name="T"/> and an <paramref name="id"/>.
         /// </summary>
-        public CardInstance Create<T>(Guid id) where T : Card
-            => Create(_cards.First(c => c is T), id);
+        public CardInstance Create<T>(Guid id, PlayerInstance owner) where T : Card
+            => Create(_cards.First(c => c is T), id, owner);
 
-        private CardInstance Create(Card card, Guid id)
+        private CardInstance Create(Card card, Guid id, PlayerInstance owner)
         {
             CardInstance instance = null;
 
@@ -54,6 +55,7 @@ namespace CardGame.Client.Factories
             }
 
             instance.Id = id;
+            instance.Owner = owner;
             instance.ManaCost = card.ManaCost;
 
             return instance;

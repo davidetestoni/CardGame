@@ -25,7 +25,7 @@ namespace SampleGame.Server
             var gameOptions = new GameInstanceOptions();
             var assembly = typeof(BasicSoldier).Assembly;
 
-            server = new SingleGameServer(port, gameOptions, assembly);
+            server = new SingleGameServer("0.0.0.0", port, gameOptions, assembly);
             Log.Info($"Server started on port {port} with assembly {assembly.GetName().Name}");
 
             server.InnerServer.ClientConnected += (sender, client)

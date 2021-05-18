@@ -157,7 +157,7 @@ namespace CardGame.Server.Instances.Game
             DrawCards(CurrentPlayer, 1, DrawEventSource.TurnStart);
 
             // Reset the attacks left for all allied creatures
-            CurrentPlayer.Field.ForEach(c => c.ResetAttacksLeft());
+            CurrentPlayer.Field.ForEach(c => ResetAttacksLeft(c));
 
             // Proc effects for the turn start
             NotifyAll(c => c.OnTurnStart(CurrentPlayer, TurnNumber));

@@ -31,11 +31,11 @@ namespace CardGame.Server.Networking
         /// Starts a server on the given <paramref name="port"/> that can host a single game
         /// which supports cards from the provided <paramref name="cardsAssembly"/>.
         /// </summary>
-        public SingleGameServer(int port, GameInstanceOptions options, Assembly cardsAssembly)
+        public SingleGameServer(string host, int port, GameInstanceOptions options, Assembly cardsAssembly)
         {
             ClientMessageHandler = new ClientMessageHandler();
             ClientMessageHandler.MessageReceived += HandleMessage;
-            InnerServer = new GameServer(ClientMessageHandler).Start(port);
+            InnerServer = new GameServer(ClientMessageHandler).Start(host, port);
             ServerMessageHandler = new ServerMessageHandler(InnerServer);
 
             cardInstanceFactory = new CardInstanceFactory(cardsAssembly);

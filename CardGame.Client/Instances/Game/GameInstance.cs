@@ -319,7 +319,7 @@ namespace CardGame.Client.Instances.Game
 
         public void PlayCreatureOpponent(string shortName, Guid creatureId)
         {
-            var creature = cardInstanceFactory.Create(shortName, creatureId) as CreatureCardInstance;
+            var creature = cardInstanceFactory.Create(shortName, creatureId, Opponent) as CreatureCardInstance;
             Opponent.HandSize--;
             Opponent.Field.Add(creature);
 
@@ -332,8 +332,9 @@ namespace CardGame.Client.Instances.Game
 
         public void SpawnCreature(string shortName, Guid creatureId, Guid playerId)
         {
-            var creature = cardInstanceFactory.Create(shortName, creatureId) as CreatureCardInstance;
-            GetPlayer(playerId).Field.Add(creature);
+            var player = GetPlayer(playerId);
+            var creature = cardInstanceFactory.Create(shortName, creatureId, player) as CreatureCardInstance;
+            player.Field.Add(creature);
 
             CreatureSpawned?.Invoke(this, new CreatureSpawnedEvent
             {
@@ -391,7 +392,7 @@ namespace CardGame.Client.Instances.Game
 
             foreach (var card in cards)
             {
-                var instance = cardInstanceFactory.Create(card.ShortName, card.Id);
+                var instance = cardInstanceFactory.Create(card.ShortName, card.Id, Me);
                 deck.Add(instance);
             }
 

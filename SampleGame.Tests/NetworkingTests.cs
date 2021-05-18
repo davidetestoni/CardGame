@@ -15,7 +15,7 @@ namespace SampleGame.Tests
             var port = 9050;
 
             var clientMessageHandler = new CardGame.Server.Handlers.ClientMessageHandler();
-            var server = new GameServer(clientMessageHandler).Start(port);
+            var server = new GameServer(clientMessageHandler).Start("127.0.0.1", port);
 
             var serverMessageHandler = new CardGame.Client.Handlers.ServerMessageHandler();
             var client = new GameClient(serverMessageHandler);
@@ -37,7 +37,7 @@ namespace SampleGame.Tests
         private void BootstrapServer(int port)
         {
             var clientMessageHandler = new CardGame.Server.Handlers.ClientMessageHandler();
-            var server = new GameServer(clientMessageHandler).Start(port);
+            var server = new GameServer(clientMessageHandler).Start("127.0.0.1", port);
         }
     }
 }

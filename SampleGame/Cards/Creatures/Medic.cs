@@ -13,6 +13,7 @@ namespace SampleGame.Cards.Creatures
             ShortName = "Medic";
             Name = "Medic";
             Description = "Description of a medic. After being attacked, restores 2 HP to a random creature on your field.";
+            Art = "https://mfiles.alphacoders.com/787/787881.jpg";
 
             ManaCost = 3;
             Attack = 1;

@@ -8,5 +8,6 @@ namespace CardGame.Server.Events.Game
     {
         public PlayerInstance Player { get; set; }
         public List<CardInstance> NewCards { get; set; }
+        public List<CardInstance> Destroyed { get; set; }
     }
 }

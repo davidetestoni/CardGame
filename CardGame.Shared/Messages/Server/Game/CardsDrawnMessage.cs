@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CardGame.Shared.DTOs;
+using System;
 using System.Collections.Generic;
 
 namespace CardGame.Shared.Messages.Server.Game
@@ -9,6 +10,11 @@ namespace CardGame.Shared.Messages.Server.Game
         /// The cards that were drawn.
         /// </summary>
         public List<Guid> NewCards { get; set; }
+
+        /// <summary>
+        /// The cards that were drawn and immediately destroyed because hand was full.
+        /// </summary>
+        public List<Guid> Destroyed { get; set; }
 
         /// <summary>
         /// The new deck size after the draw.

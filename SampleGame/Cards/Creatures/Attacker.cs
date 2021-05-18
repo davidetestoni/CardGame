@@ -12,6 +12,7 @@ namespace SampleGame.Cards.Creatures
             ShortName = "Attacker";
             Name = "Attacker";
             Description = "Description of a attacker. When attacking, deals 1 more damage.";
+            Art = "https://wallpapercave.com/wp/wp5116879.jpg";
 
             ManaCost = 2;
             Attack = 1;

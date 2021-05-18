@@ -13,6 +13,7 @@ namespace SampleGame.Cards.Creatures
             ShortName = "Booster";
             Name = "Booster";
             Description = "Description of a booster. When you play this creature, draw a card";
+            Art = "https://i.pinimg.com/originals/c8/9b/e0/c89be0e3165429401c4af6db62cea608.jpg";
 
             ManaCost = 2;
             Attack = 1;

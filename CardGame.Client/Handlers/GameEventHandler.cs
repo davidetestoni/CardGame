@@ -26,7 +26,7 @@ namespace CardGame.Client.Handlers
             {
                 #region Game
                 case GameStartedMessage x:
-                    game.StartGame(x.OpponentId, x.OpponentInfo, x.MyTurn, x.Deck);
+                    game.StartGame(x.GameInfo, x.MyTurn, x.Deck);
                     break;
 
                 case GameEndedMessage x:
@@ -38,11 +38,11 @@ namespace CardGame.Client.Handlers
                     break;
 
                 case CardsDrawnMessage x:
-                    game.DrawCards(x.NewCards);
+                    game.DrawCards(x.NewCards, x.Destroyed);
                     break;
 
                 case CardsDrawnOpponentMessage x:
-                    game.DrawCardsOpponent(x.Amount);
+                    game.DrawCardsOpponent(x.Amount, x.Destroyed);
                     break;
                 #endregion
 

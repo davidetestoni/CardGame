@@ -70,16 +70,20 @@ namespace CardGame.Client.Instances.Game
         }
 
         #region Game
-        public void StartGame(Guid opponentId, OpponentInfoDTO opponentInfo, bool myTurn, List<CardInfoDTO> deck)
+        public void StartGame(StartGameInfoDTO gameInfo, bool myTurn, List<CardInfoDTO> deck)
         {
             Opponent = new OpponentInstance
             {
-                Id = opponentId,
-                Name = opponentInfo.Name,
-                DeckSize = opponentInfo.DeckSize
+                Id = gameInfo.OpponentInfo.Id,
+                Name = gameInfo.OpponentInfo.Name,
+                DeckSize = gameInfo.OpponentInfo.DeckSize,
+                InitialHealth = gameInfo.InitialHealth,
+                CurrentHealth = gameInfo.InitialHealth
             };
 
             MyTurn = myTurn;
+            Me.InitialHealth = gameInfo.InitialHealth;
+            Me.CurrentHealth = gameInfo.InitialHealth;
             Me.Deck = ConvertDeck(deck);
 
             Status = GameStatus.Started;
@@ -126,9 +130,10 @@ namespace CardGame.Client.Instances.Game
             });
         }
 
-        public void DrawCards(List<Guid> newCards)
+        public void DrawCards(List<Guid> newCards, List<Guid> destroyed)
         {
             var instances = new List<CardInstance>();
+            var destroyedInstances = new List<CardInstance>();
 
             foreach (var card in newCards)
             {
@@ -138,20 +143,41 @@ namespace CardGame.Client.Instances.Game
             }
 
             Me.Hand.AddRange(instances);
+
+            foreach (var card in destroyed)
+            {
+                var instance = GetCardInDeck(card);
+                destroyedInstances.Add(instance);
+                Me.Deck.Remove(instance);
+            }
+
+            Me.Graveyard.AddRange(destroyedInstances);
+
             CardsDrawn?.Invoke(this, new CardsDrawnEvent
             {
-                NewCards = instances
+                NewCards = instances,
+                Destroyed = destroyedInstances
             });
         }
 
-        public void DrawCardsOpponent(int amount)
+        public void DrawCardsOpponent(int amount, List<CardInfoDTO> destroyed)
         {
+            var destroyedInstances = new List<CardInstance>();
+
             Opponent.HandSize += amount;
             Opponent.DeckSize -= amount;
 
+            foreach (var card in destroyed)
+            {
+                var instance = cardInstanceFactory.Create(card.ShortName, card.Id, Opponent);
+                destroyedInstances.Add(instance);
+                Opponent.DeckSize--;
+            }
+
             CardsDrawnOpponent?.Invoke(this, new CardsDrawnOpponentEvent
             {
-                Amount = amount
+                Amount = amount,
+                Destroyed = destroyedInstances
             });
         }
         #endregion
@@ -284,7 +310,7 @@ namespace CardGame.Client.Instances.Game
         {
             var creature = GetCreatureOnField(creatureId);
             creature.Owner.Field.Remove(creature);
-            creature.Owner.Graveyard.Add(creature.Base);
+            creature.Owner.Graveyard.Add(creature);
 
             CreatureDestroyed?.Invoke(this, new CreatureDestroyedEvent
             {

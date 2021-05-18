@@ -134,20 +134,28 @@ namespace SampleGame.Server
         private static void LogBoard()
         {
             AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine($"[darkorange]{server.Game.PlayerOne.Name}[/] ({server.Game.PlayerOne.Id})");
+            LogPlayerInfo(server.Game.PlayerOne);
             LogHand(server.Game.PlayerOne);
-            AnsiConsole.WriteLine();
             LogField(server.Game.PlayerOne);
+
             AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine($"[darkorange]{server.Game.PlayerTwo.Name}[/] ({server.Game.PlayerTwo.Id})");
+            LogPlayerInfo(server.Game.PlayerTwo);
             LogHand(server.Game.PlayerTwo);
-            AnsiConsole.WriteLine();
             LogField(server.Game.PlayerTwo);
-            AnsiConsole.WriteLine();
+        }
+
+        private static void LogPlayerInfo(PlayerInstance player)
+        {
+            AnsiConsole.MarkupLine($"Health: [red]{player.CurrentHealth} / {player.InitialHealth}[/]");
+            AnsiConsole.MarkupLine($"Mana: [dodgerblue1]{player.CurrentMana} / {player.MaximumMana}[/]");
+            AnsiConsole.MarkupLine($"Deck: [greenyellow]{player.Deck.Count}[/]");
+            AnsiConsole.MarkupLine($"Graveyard: [plum3]{player.Graveyard.Count}[/]");
         }
 
         private static void LogField(PlayerInstance player)
         {
-            AnsiConsole.MarkupLine($"[darkorange]{player.Name}[/]'s field");
-
             var table = new Table()
                 .AddColumn("[darkorange]ShortName[/]")
                 .AddColumn("[greenyellow]Id[/]")
@@ -167,8 +175,6 @@ namespace SampleGame.Server
 
         private static void LogHand(PlayerInstance player)
         {
-            AnsiConsole.MarkupLine($"[darkorange]{player.Name}[/]'s hand");
-
             var table = new Table()
                 .AddColumn("[darkorange]ShortName[/]")
                 .AddColumn("[greenyellow]Id[/]");

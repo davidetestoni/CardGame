@@ -17,7 +17,7 @@ namespace CardGame.Client.Instances.Players
         /// <summary>
         /// The cards in the graveyard.
         /// </summary>
-        public List<Card> Graveyard { get; set; } = new List<Card>();
+        public List<CardInstance> Graveyard { get; set; } = new List<CardInstance>();
 
         /// <summary>
         /// The cards on the field.

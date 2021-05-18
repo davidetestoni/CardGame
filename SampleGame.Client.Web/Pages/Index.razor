@@ -18,73 +18,79 @@ else
 {
     <div class="container-fluid">
         <div class="row">
-            <div class="col-auto">
-                <label><b>Opponent</b>: @Opponent.Name</label>
-                <br />
-                <label><b>Health</b>: @Opponent.CurrentHealth</label>
-                <br />
-                <label><b>Mana</b>: @Opponent.CurrentMana / @Opponent.MaximumMana</label>
-                <br />
-                <label><b>Hand</b>: @Opponent.HandSize</label>
-                <br />
-                <label><b>Deck</b>: @Opponent.DeckSize</label>
-                <br />
-                <label><b>Graveyard</b>: @Opponent.Graveyard.Count</label>
+            <div class="col-2">
+                <div class="card" style="width: 200px;">
+                    <img class="player-image" src="https://cdn4.iconfinder.com/data/icons/game-10/22/player-profile-512.png"
+                         width="50" height="50" alt="Player Image">
+                    <div class="card-body">
+                        <h5 class="card-title">@Opponent.Name</h5>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item health-info">@Opponent.CurrentHealth / @Opponent.InitialHealth</li>
+                        <li class="list-group-item mana-info">@Opponent.CurrentMana / @Opponent.MaximumMana</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-10">
+                @for (var i = 0; i < Opponent.HandSize; i++)
+                {
+                    <FaceDownCard />
+                }
             </div>
         </div>
-        <div class="row">
-            <p style="color: orange;">OPPONENT'S FIELD</p>
-            <br />
+        <div class="row mt-3">
+            <div class="col align-self-stretch" />
             @foreach (var card in Opponent.Field)
             {
                 <div class="col-auto">
-                    <label>@card.Base.Name ATK: @card.Attack HP: @card.Health Can attack: @card.CanAttack</label>
+                    <FaceUpCard Card="card" />
                 </div>
             }
+            <div class="col align-self-stretch" />
         </div>
-        <div class="row">
-            <p style="color: orange;">MY FIELD</p>
-            <br />
+        <div class="row mt-1">
+            <div class="col align-self-stretch" />
             @foreach (var card in Me.Field)
             {
                 <div class="col-auto">
-                    <label>@card.Base.Name ATK: @card.Attack HP: @card.Health Can attack: @card.CanAttack</label>
+                    <FaceUpCard Card="card" />
                 </div>
             }
+            <div class="col align-self-stretch" />
         </div>
-        <div class="row">
-            <p style="color: orange;">MY HAND</p>
-            <br />
-            @foreach (var card in Me.Hand)
-            {
-                <div class="col-auto">
-                    <label>@card.Base.Name MC: @card.ManaCost</label>
+        <div class="row mt-3">
+            <div class="col-2">
+                <div class="card" style="width: 200px;">
+                    <img class="player-image" src="https://cdn4.iconfinder.com/data/icons/game-10/22/player-profile-512.png"
+                         width="50" height="50" alt="Player Image">
+                    <div class="card-body">
+                        <h5 class="card-title">@Me.Name</h5>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item health-info">@Me.CurrentHealth / @Me.InitialHealth</li>
+                        <li class="list-group-item mana-info">@Me.CurrentMana / @Me.MaximumMana</li>
+                    </ul>
                 </div>
-            }
-        </div>
-        <div class="row">
-            <div class="col">
-                <label><b>Me</b>: @Me.Name</label>
-                <br />
-                <label><b>Health</b>: @Me.CurrentHealth</label>
-                <br />
-                <label><b>Mana</b>: @Me.CurrentMana / @Me.MaximumMana</label>
-                <br />
-                <label><b>Deck</b>: @Opponent.DeckSize</label>
-                <br />
-                <label><b>Graveyard</b>: @Opponent.Graveyard.Count</label>
+            </div>
+            <div class="col-10">
+                @foreach (var card in Me.Hand)
+                {
+                    <FaceUpCard Card="card" />
+                }
             </div>
         </div>
     </div>
 
     @if (client.Game.MyTurn)
     {
-        <p style="color: orange;">CHOOSE YOUR ACTION</p>
-        <br />
         <button class="btn btn-primary" @onclick="PlayCard">Play card</button>
         <button class="btn btn-primary" @onclick="AttackPlayer">Attack player</button>
         <button class="btn btn-primary" @onclick="AttackCreature">Attack creature</button>
         <button class="btn btn-primary" @onclick="EndTurn">End turn</button>
         <button class="btn btn-danger" @onclick="Surrender">Surrender</button>
+    }
+    else
+    {
+        <p>It's the enemy player's turn...</p>
     }
 }

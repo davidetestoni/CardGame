@@ -1,7 +1,14 @@
-﻿namespace CardGame.Shared.DTOs
+﻿using System;
+
+namespace CardGame.Shared.DTOs
 {
     public class OpponentInfoDTO
     {
+        /// <summary>
+        /// The id of the opponent.
+        /// </summary>
+        public Guid Id { get; set; }
+
         /// <summary>
         /// The name of the player.
         /// </summary>

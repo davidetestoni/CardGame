@@ -12,14 +12,9 @@ namespace CardGame.Shared.Messages.Server.Game
         public bool MyTurn { get; set; }
 
         /// <summary>
-        /// The id of the opponent.
-        /// </summary>
-        public Guid OpponentId { get; set; }
-
-        /// <summary>
         /// The info of the opponent.
         /// </summary>
-        public OpponentInfoDTO OpponentInfo { get; set; }
+        public StartGameInfoDTO GameInfo { get; set; }
 
         /// <summary>
         /// The cards in the deck (in random order).

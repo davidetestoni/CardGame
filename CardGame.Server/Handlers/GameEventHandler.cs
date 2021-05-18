@@ -32,11 +32,15 @@ namespace CardGame.Server.Handlers
                 var p1Message = new GameStartedMessage
                 {
                     MyTurn = e.CurrentPlayer.Id == game.PlayerOne.Id,
-                    OpponentId = game.PlayerTwo.Id,
-                    OpponentInfo = new OpponentInfoDTO
+                    GameInfo = new StartGameInfoDTO
                     {
-                        Name = game.PlayerTwo.Name,
-                        DeckSize = game.PlayerTwo.Deck.Count
+                        InitialHealth = game.Options.InitialHealth,
+                        OpponentInfo = new OpponentInfoDTO
+                        {
+                            Id = game.PlayerTwo.Id,
+                            Name = game.PlayerTwo.Name,
+                            DeckSize = game.PlayerTwo.Deck.Count
+                        }
                     },
                     Deck = ConvertDeck(game.PlayerOne)
                 };
@@ -47,11 +51,15 @@ namespace CardGame.Server.Handlers
                 var p2Message = new GameStartedMessage
                 {
                     MyTurn = e.CurrentPlayer.Id == game.PlayerTwo.Id,
-                    OpponentId = game.PlayerOne.Id,
-                    OpponentInfo = new OpponentInfoDTO
+                    GameInfo = new StartGameInfoDTO
                     {
-                        Name = game.PlayerOne.Name,
-                        DeckSize = game.PlayerOne.Deck.Count
+                        InitialHealth = game.Options.InitialHealth,
+                        OpponentInfo = new OpponentInfoDTO
+                        {
+                            Id = game.PlayerOne.Id,
+                            Name = game.PlayerOne.Name,
+                            DeckSize = game.PlayerOne.Deck.Count
+                        }
                     },
                     Deck = ConvertDeck(game.PlayerTwo)
                 };
@@ -85,7 +93,8 @@ namespace CardGame.Server.Handlers
                 var message = new CardsDrawnMessage
                 {
                     NewCards = e.NewCards.Select(c => c.Id).ToList(),
-                    DeckSize = e.Player.Deck.Count
+                    DeckSize = e.Player.Deck.Count,
+                    Destroyed = e.Destroyed.Select(c => c.Id).ToList()
                 };
 
                 serverMessageHandler.SendMessage(message, e.Player.Id);
@@ -93,7 +102,8 @@ namespace CardGame.Server.Handlers
                 var opponentMessage = new CardsDrawnOpponentMessage
                 {
                     Amount = e.NewCards.Count,
-                    DeckSize = e.Player.Deck.Count
+                    DeckSize = e.Player.Deck.Count,
+                    Destroyed = e.Destroyed.Select(c => new CardInfoDTO { Id = c.Id, ShortName = c.ShortName }).ToList()
                 };
 
                 serverMessageHandler.SendMessage(opponentMessage, game.GetOpponent(e.Player).Id);

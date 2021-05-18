@@ -273,6 +273,7 @@ namespace CardGame.Server.Instances.Game
             }
 
             List<CardInstance> newCards = new List<CardInstance>();
+            List<CardInstance> destroyedCards = new List<CardInstance>();
             int drawn = 0;
 
             while (drawn < count)
@@ -297,6 +298,7 @@ namespace CardGame.Server.Instances.Game
                     // Otherwise send it to the graveyard
                     else
                     {
+                        destroyedCards.Add(card);
                         player.Graveyard.Add(card);
                     }
                 }
@@ -305,7 +307,12 @@ namespace CardGame.Server.Instances.Game
             }
 
             NotifyAll(c => c.OnCardsDrawn(player, count, drawEventSource));
-            CardsDrawn?.Invoke(this, new CardsDrawnEvent { Player = player, NewCards = newCards });
+            CardsDrawn?.Invoke(this, new CardsDrawnEvent 
+            {
+                Player = player, 
+                NewCards = newCards,
+                Destroyed = destroyedCards
+            });
 
             return this;
         }
@@ -390,7 +397,6 @@ namespace CardGame.Server.Instances.Game
             else
             {
                 target.CurrentHealth = 0;
-                CheckVictory();
             }
 
             if (source is CreatureCardInstance creature)
@@ -401,6 +407,8 @@ namespace CardGame.Server.Instances.Game
             {
                 PlayerDamaged?.Invoke(this, new PlayerDamagedEvent { Player = target, Damage = damage });
             }
+
+            CheckVictory();
 
             return this;
         }
@@ -445,7 +453,7 @@ namespace CardGame.Server.Instances.Game
                 targetMana = Options.MaximumMana;
             }
 
-            var increment = targetMana - player.CurrentMana;
+            var increment = targetMana - player.MaximumMana;
 
             if (increment == 0)
             {

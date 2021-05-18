@@ -101,7 +101,7 @@ namespace SampleGame.Client.Web.Pages
                 var attacker = (CreatureCardInstance)result.Data;
 
                 parameters = new ModalParameters();
-                parameters.Add(nameof(ChooseCard.Cards), client.Game.Me.Field);
+                parameters.Add(nameof(ChooseCard.Cards), client.Game.Opponent.Field);
 
                 modal = Modal.Show<ChooseCard>("Choose card", parameters);
                 result = await modal.Result;

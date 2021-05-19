@@ -5,26 +5,28 @@ using CardGame.Shared.Models.Cards;
 
 namespace SampleGame.Cards.Creatures
 {
-    [PlayableCard(typeof(MedicInstance))]
-    public class Medic : CreatureCard
+    [PlayableCard(typeof(HollyInstance))]
+    public class Holly : CreatureCard
     {
-        public Medic()
+        public Holly()
         {
-            ShortName = "Medic";
-            Name = "Medic";
-            Description = "Description of a medic. After being attacked, restores 2 HP to a random creature on your field.";
-            Art = "https://mfiles.alphacoders.com/787/787881.jpg";
+            ShortName = "Holly";
+            Name = "Holly";
+            Description = "After being attacked, restores 2 HP to a random ally.";
+            Art = "";
 
-            ManaCost = 3;
+            ManaCost = 4;
             Attack = 1;
-            Health = 3;
+            Health = 6;
         }
     }
 
-    public class MedicInstance : CreatureCardInstance
+    public class HollyInstance : CreatureCardInstance
     {
         public override void OnAfterAttack(CreatureCardInstance attacker, CreatureCardInstance target, int damage)
         {
+            base.OnAfterAttack(attacker, target, damage);
+
             if (target == this && Health > 0)
             {
                 var cardToHeal = Owner.Field.GetRandom(Game.Random);

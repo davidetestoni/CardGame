@@ -82,7 +82,7 @@ namespace CardGame.Client.Handlers
 
                 #region Creatures
                 case CreatureAttackChangedMessage x:
-                    game.ChangeCreatureAttack(x.CreatureId, x.NewValue);
+                    game.ChangeCreatureAttack(x.CreatureId, x.Amount);
                     break;
 
                 case CreatureAttackedMessage x:

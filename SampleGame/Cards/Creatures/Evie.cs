@@ -5,14 +5,14 @@ using CardGame.Shared.Models.Cards;
 namespace SampleGame.Cards.Creatures
 {
     [PlayableCard(typeof(CreatureCardInstance)), Rush]
-    public class Quickshot : CreatureCard
+    public class Evie : CreatureCard
     {
-        public Quickshot()
+        public Evie()
         {
-            ShortName = "Quickshot";
-            Name = "Quickshot";
-            Description = "Description of a quickshot";
-            Art = "https://i.pinimg.com/736x/d4/c2/4b/d4c24bddd80bbefa037407b8f65c4ccc.jpg";
+            ShortName = "Evie";
+            Name = "Evie";
+            Description = "Quick unit";
+            Art = "";
 
             ManaCost = 2;
             Attack = 1;

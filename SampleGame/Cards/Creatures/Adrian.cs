@@ -5,23 +5,23 @@ using CardGame.Shared.Models.Cards;
 
 namespace SampleGame.Cards.Creatures
 {
-    [PlayableCard(typeof(BoosterInstance))]
-    public class Booster : CreatureCard
+    [PlayableCard(typeof(AdrianInstance))]
+    public class Adrian : CreatureCard
     {
-        public Booster()
+        public Adrian()
         {
-            ShortName = "Booster";
-            Name = "Booster";
-            Description = "Description of a booster. When you play this creature, draw a card";
-            Art = "https://i.pinimg.com/originals/c8/9b/e0/c89be0e3165429401c4af6db62cea608.jpg";
+            ShortName = "Adrian";
+            Name = "Adrian";
+            Description = "When you play Adrian, draw a card";
+            Art = "";
 
             ManaCost = 2;
             Attack = 1;
-            Health = 1;
+            Health = 2;
         }
     }
 
-    public class BoosterInstance : CreatureCardInstance
+    public class AdrianInstance : CreatureCardInstance
     {
         public override void OnCreaturePlayed(PlayerInstance player, CreatureCardInstance newCard)
         {

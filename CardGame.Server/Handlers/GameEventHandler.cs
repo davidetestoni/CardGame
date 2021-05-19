@@ -207,7 +207,7 @@ namespace CardGame.Server.Handlers
                 var message = new CreatureAttackChangedMessage
                 {
                     CreatureId = e.Creature.Id,
-                    NewValue = e.NewValue
+                    Amount = e.Amount
                 };
 
                 serverMessageHandler.BroadcastMessage(message);

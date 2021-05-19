@@ -25,7 +25,7 @@ namespace CardGame.Server.Factories
         /// </summary>
         public GameInstance Create(GameInstanceOptions options)
         {
-            return new GameInstance()
+            return new GameInstance(cardInstanceFactory)
             {
                 Id = Guid.NewGuid(),
                 Options = options
@@ -38,7 +38,7 @@ namespace CardGame.Server.Factories
         /// </summary>
         public GameInstance Create(GameInstanceOptions options, Player playerOne, Player playerTwo)
         {
-            var game = new GameInstance()
+            var game = new GameInstance(cardInstanceFactory)
             {
                 Id = Guid.NewGuid(),
                 Options = options

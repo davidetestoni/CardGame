@@ -170,11 +170,17 @@ namespace CardGame.Server.Instances.Cards
         public virtual void OnCardsDrawn(PlayerInstance player, int count, DrawEventSource drawEventSource = DrawEventSource.Effect) { }
 
         /// <summary>
-        /// Called when a card is placed on the field by a player.
+        /// Called when a creature is placed on the field by a player.
         /// </summary>
-        /// <param name="player">The player that placed the card</param>
-        /// <param name="newCard">The card that just joined the field</param>
+        /// <param name="player">The player that played the creature</param>
+        /// <param name="newCard">The creature that just joined the field</param>
         public virtual void OnCreaturePlayed(PlayerInstance player, CreatureCardInstance newCard) { }
+
+        /// <summary>
+        /// Called when a creature is spawned on the field due to an effect.
+        /// </summary>
+        /// <param name="newCard">The new creature</param>
+        public virtual void OnCreatureSpawned(CreatureCardInstance newCard) { }
 
         /// <summary>
         /// Called when a card is healed by an effect.

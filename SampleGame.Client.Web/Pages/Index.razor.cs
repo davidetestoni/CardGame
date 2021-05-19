@@ -34,20 +34,20 @@ namespace SampleGame.Client.Web.Pages
 
         private void Connect()
         {
-            client = new SingleGameClient(typeof(BasicSoldier).Assembly, new Player
+            client = new SingleGameClient(typeof(Roland).Assembly, new Player
             {
                 Name = connectionInfo.Name,
 
                 // TODO: Let users customize their deck
                 Deck = new Dictionary<string, int>
                 {
-                    { "BasicSoldier", 10 },
-                    { "Attacker", 5 },
-                    { "Booster", 5 },
-                    { "Defender", 3 },
-                    { "Gunner", 5 },
-                    { "Medic", 3 },
-                    { "Quickshot", 5 }
+                    { "Roland", 10 },
+                    { "Lizzie", 5 },
+                    { "Adrian", 5 },
+                    { "Lenny", 3 },
+                    { "Simon", 5 },
+                    { "Holly", 3 },
+                    { "Evie", 5 }
                 }
             });
 
@@ -219,7 +219,7 @@ namespace SampleGame.Client.Web.Pages
 
             client.Game.CreatureAttackChanged += (sender, e) =>
             {
-                LogInfo($"{e.Creature.ShortName}'s attack changed to {e.NewValue}");
+                LogInfo($"{e.Creature.ShortName}'s attack changed by {e.Amount}");
                 InvokeAsync(StateHasChanged);
             };
 

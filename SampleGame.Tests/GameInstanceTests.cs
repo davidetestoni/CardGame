@@ -175,15 +175,15 @@ namespace SampleGame.Tests
 
         #region AttackCreature
         [Fact]
-        public void AttackCreature_SoldierSoldier_BothDestroyed()
+        public void AttackCreature_RolandRoland_BothDestroyed()
         {
             var game = 
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields1v1(new BasicSoldier(), new BasicSoldier())
+                .SetFields1v1(new Roland(), new Roland())
                 .ResetAttacksLeft();
 
-            // Attack the opponent's basic soldier
+            // Attack the opponent's Roland
             game.AttackCreature(game.CurrentPlayer, game.CurrentPlayer.Field[0], game.Opponent.Field[0]);
 
             Assert.Empty(game.CurrentPlayer.Field);
@@ -193,48 +193,48 @@ namespace SampleGame.Tests
         }
 
         [Fact]
-        public void AttackCreature_SoldierGunner_SoldierDestroyedGunnerDamaged()
+        public void AttackCreature_RolandSimon_RolandDestroyedSimonDamaged()
         {
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields1v1(new BasicSoldier(), new Gunner())
+                .SetFields1v1(new Roland(), new Simon())
                 .ResetAttacksLeft();
 
-            // Attack the gunner with the soldier
-            var soldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
-            var gunner = game.Opponent.GetCreatureOnField<Gunner>();
-            game.AttackCreature(game.CurrentPlayer, soldier, gunner);
+            // Attack Simon with Roland
+            var roland = game.CurrentPlayer.GetCreatureOnField<Roland>();
+            var simon = game.Opponent.GetCreatureOnField<Simon>();
+            game.AttackCreature(game.CurrentPlayer, roland, simon);
 
             Assert.Empty(game.CurrentPlayer.Field);
             Assert.Single(game.Opponent.Field);
             Assert.Single(game.CurrentPlayer.Graveyard);
             Assert.Empty(game.Opponent.Graveyard);
 
-            Assert.Equal(gunner.Base.Health - 1, gunner.Health);
+            Assert.Equal(simon.Base.Health - 1, simon.Health);
         }
 
         [Fact]
-        public void AttackCreature_GunnerSoldier_GunnerDamagedSoldierDestroyed()
+        public void AttackCreature_SimonRoland_SimonDamagedRolandDestroyed()
         {
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields1v1(new Gunner(), new BasicSoldier())
+                .SetFields1v1(new Simon(), new Roland())
                 .ResetAttacksLeft();
 
-            // Attack the soldier with the gunner
-            var gunner = game.CurrentPlayer.GetCreatureOnField<Gunner>();
-            var soldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
-            game.AttackCreature(game.CurrentPlayer, gunner, soldier);
+            // Attack Roland with Simon
+            var simon = game.CurrentPlayer.GetCreatureOnField<Simon>();
+            var roland = game.Opponent.GetCreatureOnField<Roland>();
+            game.AttackCreature(game.CurrentPlayer, simon, roland);
 
             Assert.Single(game.CurrentPlayer.Field);
             Assert.Empty(game.Opponent.Field);
             Assert.Empty(game.CurrentPlayer.Graveyard);
             Assert.Single(game.Opponent.Graveyard);
 
-            Assert.Equal(gunner.Base.Health - 1, gunner.Health);
-            Assert.Equal(0, gunner.AttacksLeft);
+            Assert.Equal(simon.Base.Health - 1, simon.Health);
+            Assert.Equal(0, simon.AttacksLeft);
         }
 
         [Fact]
@@ -243,13 +243,13 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields1v1(new BasicSoldier(), new BasicSoldier());
+                .SetFields1v1(new Roland(), new Roland());
 
-            // Try to attack the enemy soldier
-            var mySoldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
-            var enemySoldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
+            // Try to attack the enemy Roland
+            var myRoland = game.CurrentPlayer.GetCreatureOnField<Roland>();
+            var enemyRoland = game.Opponent.GetCreatureOnField<Roland>();
             Assert.Throws<Exception>(() =>
-                game.AttackCreature(game.CurrentPlayer, mySoldier, enemySoldier));
+                game.AttackCreature(game.CurrentPlayer, myRoland, enemyRoland));
         }
 
         [Fact]
@@ -258,34 +258,34 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new List<Card> { new BasicSoldier(), new Gunner() })
+                .SetFields(new List<Card> { new Roland(), new Simon() })
                 .ResetAttacksLeft();
 
-            // Try to attack the gunner with the soldier
-            var soldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
-            var gunner = game.CurrentPlayer.GetCreatureOnField<Gunner>();
+            // Try to attack Simon with Roland
+            var roland = game.CurrentPlayer.GetCreatureOnField<Roland>();
+            var simon = game.CurrentPlayer.GetCreatureOnField<Simon>();
             Assert.Throws<Exception>(() =>
-                game.AttackCreature(game.CurrentPlayer, soldier, gunner));
+                game.AttackCreature(game.CurrentPlayer, roland, simon));
         }
         #endregion
 
         #region AttackPlayer
         [Fact]
-        public void AttackPlayer_Soldier_DealsDamage()
+        public void AttackPlayer_Roland_DealsDamage()
         {
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields1v1(new BasicSoldier(), null)
+                .SetFields1v1(new Roland(), null)
                 .ResetAttacksLeft();
 
             // Attack the opponent
-            var soldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
-            game.AttackPlayer(game.CurrentPlayer, soldier);
+            var roland = game.CurrentPlayer.GetCreatureOnField<Roland>();
+            game.AttackPlayer(game.CurrentPlayer, roland);
 
-            Assert.Equal(game.Opponent.InitialHealth - soldier.Attack, game.Opponent.CurrentHealth);
-            Assert.Equal(0, soldier.AttacksLeft);
-            Assert.Equal(soldier.Base.Health, soldier.Health);
+            Assert.Equal(game.Opponent.InitialHealth - roland.Attack, game.Opponent.CurrentHealth);
+            Assert.Equal(0, roland.AttacksLeft);
+            Assert.Equal(roland.Base.Health, roland.Health);
         }
         #endregion
 
@@ -296,12 +296,12 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields1v1(new Gunner());
+                .SetFields1v1(new Simon());
 
-            var gunner = game.CurrentPlayer.GetCreatureOnField<Gunner>();
-            gunner.Health = 1;
-            game.RestoreCreatureHealth(gunner, 2);
-            Assert.Equal(3, gunner.Health);
+            var simon = game.CurrentPlayer.GetCreatureOnField<Simon>();
+            simon.Health = 1;
+            game.RestoreCreatureHealth(simon, 2);
+            Assert.Equal(3, simon.Health);
         }
 
         [Fact]
@@ -310,12 +310,12 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields1v1(new Gunner());
+                .SetFields1v1(new Simon());
 
-            var gunner = game.CurrentPlayer.GetCreatureOnField<Gunner>();
-            gunner.Health = 2;
-            game.RestoreCreatureHealth(gunner, 2);
-            Assert.Equal(3, gunner.Health);
+            var simon = game.CurrentPlayer.GetCreatureOnField<Simon>();
+            simon.Health = 2;
+            game.RestoreCreatureHealth(simon, 2);
+            Assert.Equal(3, simon.Health);
         }
         #endregion
 
@@ -372,14 +372,14 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields(new List<Card> { new BasicSoldier() }, new List<Card> { new Defender(), new BasicSoldier() })
+                .SetFields(new List<Card> { new Roland() }, new List<Card> { new Lenny(), new Roland() })
                 .ResetAttacksLeft();
 
-            // Try to attack the soldier
-            var mySoldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
-            var enemySoldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
+            // Try to attack the enemy Roland
+            var myRoland = game.CurrentPlayer.GetCreatureOnField<Roland>();
+            var enemyRoland = game.Opponent.GetCreatureOnField<Roland>();
             Assert.Throws<Exception>(() =>
-                game.AttackCreature(game.CurrentPlayer, mySoldier, enemySoldier));
+                game.AttackCreature(game.CurrentPlayer, myRoland, enemyRoland));
         }
 
         [Fact]
@@ -388,18 +388,18 @@ namespace SampleGame.Tests
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
-                .SetFields1vMany(new BasicSoldier(), new List<Card> { new Defender(), new BasicSoldier() })
+                .SetFields1vMany(new Roland(), new List<Card> { new Lenny(), new Roland() })
                 .ResetAttacksLeft();
 
-            // Attack the defender
-            var mySoldier = game.CurrentPlayer.GetCreatureOnField<BasicSoldier>();
-            var defender = game.Opponent.GetCreatureOnField<Defender>();
-            game.AttackCreature(game.CurrentPlayer, mySoldier, defender);
+            // Attack Lenny with Roland
+            var roland = game.CurrentPlayer.GetCreatureOnField<Roland>();
+            var lenny = game.Opponent.GetCreatureOnField<Lenny>();
+            game.AttackCreature(game.CurrentPlayer, roland, lenny);
 
             Assert.Empty(game.CurrentPlayer.Field);
             Assert.Equal(2, game.Opponent.Field.Count);
 
-            Assert.Equal(defender.Base.Health - 1, defender.Health);
+            Assert.Equal(lenny.Base.Health - 1, lenny.Health);
         }
         #endregion
 
@@ -412,18 +412,18 @@ namespace SampleGame.Tests
                 .Start()
                 .SetMana(2, 2);
 
-            var quickshot = _factoryFixture.CardFactory.Create<Quickshot>(game, game.CurrentPlayer) as CreatureCardInstance;
+            var evie = _factoryFixture.CardFactory.Create<Evie>(game, game.CurrentPlayer) as CreatureCardInstance;
 
             game
-                .SetHands(quickshot)
-                .SetFields1v1(null, new BasicSoldier());
+                .SetHands(evie)
+                .SetFields1v1(null, new Roland());
 
-            // Play the quickshot
-            game.PlayCreatureFromHand(game.CurrentPlayer, quickshot);
+            // Play Evie
+            game.PlayCreatureFromHand(game.CurrentPlayer, evie);
 
             // Attack immediately
-            var soldier = game.Opponent.GetCreatureOnField<BasicSoldier>();
-            game.AttackCreature(game.CurrentPlayer, quickshot, soldier);
+            var roland = game.Opponent.GetCreatureOnField<Roland>();
+            game.AttackCreature(game.CurrentPlayer, evie, roland);
 
             Assert.Empty(game.CurrentPlayer.Field);
             Assert.Empty(game.Opponent.Field);

@@ -4,15 +4,15 @@ using CardGame.Shared.Models.Cards;
 
 namespace SampleGame.Cards.Creatures
 {
-    [PlayableCard(typeof(AttackerInstance))]
-    public class Attacker : CreatureCard
+    [PlayableCard(typeof(LizzieInstance))]
+    public class Lizzie : CreatureCard
     {
-        public Attacker()
+        public Lizzie()
         {
-            ShortName = "Attacker";
-            Name = "Attacker";
-            Description = "Description of a attacker. When attacking, deals 1 more damage.";
-            Art = "https://wallpapercave.com/wp/wp5116879.jpg";
+            ShortName = "Lizzie";
+            Name = "Lizzie";
+            Description = "When attacking, deals 1 more damage.";
+            Art = "Lizzie";
 
             ManaCost = 2;
             Attack = 1;
@@ -20,7 +20,7 @@ namespace SampleGame.Cards.Creatures
         }
     }
 
-    public class AttackerInstance : CreatureCardInstance
+    public class LizzieInstance : CreatureCardInstance
     {
         public override int GetAttackDamage(CreatureCardInstance target, bool isAttacking)
             => isAttacking ? Attack + 1 : Attack;

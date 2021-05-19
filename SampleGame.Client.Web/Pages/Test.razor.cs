@@ -16,7 +16,7 @@ namespace SampleGame.Client.Web.Pages
 
         public Test()
         {
-            factory = new CardInstanceFactory(typeof(BasicSoldier).Assembly);
+            factory = new CardInstanceFactory(typeof(Roland).Assembly);
 
             Opponent = new OpponentInstance
             {

@@ -92,7 +92,7 @@ namespace SampleGame.Tests.Extensions
                 throw new ArgumentException("Too many cards in the opponent's field");
             }
 
-            var factory = new CardInstanceFactory(typeof(BasicSoldier).Assembly);
+            var factory = new CardInstanceFactory(typeof(Roland).Assembly);
             game.CurrentPlayer.Field.Clear();
             game.Opponent.Field.Clear();
 

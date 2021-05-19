@@ -10,8 +10,8 @@ namespace CardGame.Shared.Messages.Server.Cards.Creatures
         public Guid CreatureId { get; set; }
 
         /// <summary>
-        /// The new value of the attack.
+        /// The increase or decrease amount of the attack.
         /// </summary>
-        public int NewValue { get; set; }
+        public int Amount { get; set; }
     }
 }

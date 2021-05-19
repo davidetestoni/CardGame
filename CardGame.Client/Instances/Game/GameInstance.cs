@@ -360,17 +360,16 @@ namespace CardGame.Client.Instances.Game
         #endregion
 
         #region Creatures
-        internal void ChangeCreatureAttack(Guid creatureId, int newValue)
+        internal void ChangeCreatureAttack(Guid creatureId, int amount)
         {
             var creature = GetCreatureOnField(creatureId);
             var oldValue = creature.Attack;
-            creature.Attack = newValue;
+            creature.Attack += amount;
 
             CreatureAttackChanged?.Invoke(this, new CreatureAttackChangedEventArgs
             {
                 Creature = creature,
-                OldValue = oldValue,
-                NewValue = newValue
+                Amount = amount,
             });
         }
 

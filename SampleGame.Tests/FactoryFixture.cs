@@ -13,13 +13,13 @@ namespace SampleGame.Tests
 
         public FactoryFixture()
         {
-            CardFactory = new(typeof(BasicSoldier).Assembly);
+            CardFactory = new(typeof(Roland).Assembly);
             GameFactory = new(CardFactory);
         }
 
         /// <summary>
         /// Creates a test game with 2 players with test decks made of <paramref name="deckSize"/>
-        /// copies of <see cref="BasicSoldier"/>.
+        /// copies of <see cref="Roland"/>.
         /// </summary>
         public GameInstance CreateTestGame(int deckSize = 20)
         {
@@ -50,7 +50,7 @@ namespace SampleGame.Tests
                 Name = name,
                 Deck = new Dictionary<string, int>
                 {
-                    { "BasicSoldier", deckSize }
+                    { "Roland", deckSize }
                 }
             };
 
@@ -61,8 +61,8 @@ namespace SampleGame.Tests
                 Name = name,
                 Deck = new Dictionary<string, int>
                 {
-                    { "BasicSoldier", 4 },
-                    { "Gunner", 3 },
+                    { "Roland", 4 },
+                    { "Simon", 3 },
                     { "Defender", 3 }
                 }
             };

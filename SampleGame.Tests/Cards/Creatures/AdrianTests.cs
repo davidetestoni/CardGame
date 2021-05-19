@@ -5,30 +5,30 @@ using Xunit;
 
 namespace SampleGame.Tests.Cards.Creatures
 {
-    public class BoosterTests : IClassFixture<FactoryFixture>
+    public class AdrianTests : IClassFixture<FactoryFixture>
     {
         private readonly FactoryFixture _factoryFixture;
 
-        public BoosterTests(FactoryFixture factoryFixture)
+        public AdrianTests(FactoryFixture factoryFixture)
         {
             _factoryFixture = factoryFixture;
         }
 
         [Fact]
-        public void PlayCreatureFromHand_Booster_EffectProcs()
+        public void PlayCreatureFromHand_Adrian_EffectProcs()
         {
             var game =
                 _factoryFixture.CreateTestGame()
                 .Start()
                 .SetMana(2, 2);
 
-            var booster = _factoryFixture.CardFactory.Create<Booster>(game, game.CurrentPlayer) as CreatureCardInstance;
+            var adrian = _factoryFixture.CardFactory.Create<Adrian>(game, game.CurrentPlayer) as CreatureCardInstance;
 
             game
-                .SetHands(booster);
+                .SetHands(adrian);
 
-            // Play the booster
-            game.PlayCreatureFromHand(game.CurrentPlayer, booster);
+            // Play Adrian
+            game.PlayCreatureFromHand(game.CurrentPlayer, adrian);
 
             Assert.Single(game.CurrentPlayer.Hand);
         }

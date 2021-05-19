@@ -30,7 +30,8 @@ public class Attacker : CreatureCard
 public class AttackerInstance : CreatureCardInstance
 {
     // When attacking, deal 1 more damage
-    public override int GetAttackDamage(CreatureCardInstance target, bool isDefending) => Attack + 1;
+    public override int GetAttackDamage(CreatureCardInstance target, bool isDefending)
+        => isDefending ? Attack : Attack + 1;
 }
 ```
 

@@ -4,8 +4,7 @@ using System.Collections.Generic;
 namespace CardGame.Shared.Models.Players
 {
     /// <summary>
-    /// This is the representation of a player, to be used during the
-    /// creation of a <see cref="GameInstance"/>.
+    /// This is the representation of a player that wants to join a game.
     /// </summary>
     public class Player
     {

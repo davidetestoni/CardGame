@@ -1,8 +1,8 @@
-﻿using CardGame.Shared.Models.Effects;
-using System.Collections.Generic;
-
-namespace CardGame.Shared.Models.Cards
+﻿namespace CardGame.Shared.Models.Cards
 {
+    /// <summary>
+    /// This is the representation of a creature card with its base values.
+    /// </summary>
     public class CreatureCard : Card
     {
         /// <summary>
@@ -14,10 +14,5 @@ namespace CardGame.Shared.Models.Cards
         /// The base value of the health of this card.
         /// </summary>
         public int Health { get; set; } = 1;
-
-        /// <summary>
-        /// The effects of this card.
-        /// </summary>
-        public List<Effect> Effects { get; set; } = new List<Effect>();
     }
 }

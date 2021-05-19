@@ -26,7 +26,7 @@
         public string Description { get; set; } = "Description";
 
         /// <summary>
-        /// The string to get the art of the card.
+        /// The resource that contains the art of the card.
         /// </summary>
         public string Art { get; set; } = string.Empty;
     }

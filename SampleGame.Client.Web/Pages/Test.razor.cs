@@ -1,6 +1,8 @@
-﻿using CardGame.Client.Factories;
+﻿using Blazored.Toast.Services;
+using CardGame.Client.Factories;
 using CardGame.Client.Instances.Cards;
 using CardGame.Client.Instances.Players;
+using Microsoft.AspNetCore.Components;
 using SampleGame.Cards.Creatures;
 using System;
 using System.Collections.Generic;
@@ -9,6 +11,8 @@ namespace SampleGame.Client.Web.Pages
 {
     public partial class Test
     {
+        [Inject] private IToastService ToastService { get; set; }
+
         public OpponentInstance Opponent { get; set; }
         public MeInstance Me { get; set; }
 
@@ -74,5 +78,8 @@ namespace SampleGame.Client.Web.Pages
 
         private CreatureCardInstance NewCreature(string shortName)
             => factory.Create(shortName, Guid.Empty, Opponent) as CreatureCardInstance;
+
+        private void ToastInfo()
+            => ToastService.ShowInfo("message", "Title");
     }
 }

@@ -67,3 +67,16 @@
     margin-left: 82px;
     margin-top: -25px;
 }
+
+.blazored-toast {
+    width: 300px;
+    padding: 5px 10px;
+}
+
+.blazored-toast-heading {
+    font-size: 18px !important;
+}
+
+.blazored-toast-message {
+    font-size: 14px !important;
+}

@@ -36,7 +36,7 @@ namespace CardGame.Client.Instances.Game
         public OpponentInstance Opponent { get; set; }
 
         /// <summary>
-        /// How many turns have passed since the beginning of the game.
+        /// How many turns have passed since the start of the game.
         /// </summary>
         public int TurnNumber { get; set; } = 1;
 
@@ -58,7 +58,7 @@ namespace CardGame.Client.Instances.Game
         /// <summary>
         /// Whether the game finished because of a surrender from either player.
         /// </summary>
-        public bool Surrender { get; set; } = false;
+        public bool Surrendered { get; set; } = false;
 
         #region Events
         /// <summary>
@@ -216,13 +216,13 @@ namespace CardGame.Client.Instances.Game
         internal void EndGame(Guid winnerId, bool surrender)
         {
             Winner = GetPlayer(winnerId);
-            Surrender = surrender;
+            Surrendered = surrender;
             Status = GameStatus.Finished;
 
             GameEnded?.Invoke(this, new GameEndedEventArgs
             {
                 Winner = Winner,
-                Surrender = Surrender
+                Surrendered = Surrendered
             });
         }
 

@@ -12,6 +12,6 @@ namespace CardGame.Shared.Messages.Server.Game
         /// <summary>
         /// Whether the game ended due to a surrender.
         /// </summary>
-        public bool Surrender { get; set; }
+        public bool Surrendered { get; set; }
     }
 }

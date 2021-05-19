@@ -19,6 +19,11 @@ namespace CardGame.Client.Networking
         private readonly ServerMessageHandler serverMessageHandler;
 
         /// <summary>
+        /// Called when the client connected to the game server.
+        /// </summary>
+        public event EventHandler Connected;
+
+        /// <summary>
         /// Called when a raw message is received from the server.
         /// </summary>
         public event EventHandler<string> MessageReceived;
@@ -27,11 +32,6 @@ namespace CardGame.Client.Networking
         /// Called when a raw message is sent to the server.
         /// </summary>
         public event EventHandler<string> MessageSent;
-
-        /// <summary>
-        /// Called when the client connected to the game server.
-        /// </summary>
-        public event EventHandler Connected;
 
         public GameClient(ServerMessageHandler serverMessageHandler)
         {

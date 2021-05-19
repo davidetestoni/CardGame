@@ -5,6 +5,9 @@ using System;
 
 namespace CardGame.Server.Handlers
 {
+    /// <summary>
+    /// Handles serializing and sending messages from the server to clients.
+    /// </summary>
     public class ServerMessageHandler
     {
         private readonly GameServer server;

@@ -1,13 +1,11 @@
 ﻿using CardGame.Server.Instances.Game;
 using CardGame.Server.Instances.Players;
-using CardGame.Shared.Models.Cards;
 using System;
 
 namespace CardGame.Server.Instances.Cards
 {
     /// <summary>
-    /// This is the instance of a card in the game. When a <see cref="Card"/> is
-    /// instanced, it will become a <see cref="CardInstance"/>.
+    /// Server-side instance of a card.
     /// </summary>
     public abstract class CardInstance
     {

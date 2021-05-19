@@ -9,6 +9,9 @@ using CardGame.Shared.Messages.Client.Game;
 
 namespace CardGame.Server.Handlers
 {
+    /// <summary>
+    /// Handles actions received from clients and tries to apply them to a <see cref="GameInstance"/>.
+    /// </summary>
     public class PlayerActionHandler
     {
         private readonly GameInstance game;

@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace CardGame.Server.Factories
 {
+    /// <summary>
+    /// Takes care of creating new games.
+    /// </summary>
     public class GameInstanceFactory
     {
         private readonly CardInstanceFactory cardInstanceFactory;
@@ -17,6 +20,9 @@ namespace CardGame.Server.Factories
             this.cardInstanceFactory = cardInstanceFactory;
         }
 
+        /// <summary>
+        /// Creates a game with the given <paramref name="options"/>, without setting the players.
+        /// </summary>
         public GameInstance Create(GameInstanceOptions options)
         {
             return new GameInstance()
@@ -26,6 +32,10 @@ namespace CardGame.Server.Factories
             };
         }
 
+        /// <summary>
+        /// Creates a game with the given <paramref name="options"/> and two players (<paramref name="playerOne"/>
+        /// and <paramref name="playerTwo"/>).
+        /// </summary>
         public GameInstance Create(GameInstanceOptions options, Player playerOne, Player playerTwo)
         {
             var game = new GameInstance()
@@ -34,13 +44,17 @@ namespace CardGame.Server.Factories
                 Options = options
             };
 
-            game.PlayerOne = CreatePlayer(game, playerOne);
-            game.PlayerTwo = CreatePlayer(game, playerTwo);
+            game.PlayerOne = AddPlayer(game, playerOne);
+            game.PlayerTwo = AddPlayer(game, playerTwo);
 
             return game;
         }
 
-        public PlayerInstance CreatePlayer(GameInstance game, Player player)
+        /// <summary>
+        /// Creates a <see cref="PlayerInstance"/> from a <paramref name="player"/>
+        /// and adds it to a <paramref name="game"/>.
+        /// </summary>
+        public PlayerInstance AddPlayer(GameInstance game, Player player)
         {
             var instance = new PlayerInstance
             {

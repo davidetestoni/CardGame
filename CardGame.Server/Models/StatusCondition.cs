@@ -1,5 +1,6 @@
 ﻿namespace CardGame.Server.Models
 {
+    // TODO: Implement this
     public abstract class StatusCondition
     {
         /// <summary>

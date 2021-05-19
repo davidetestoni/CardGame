@@ -8,7 +8,7 @@ namespace CardGame.Server.Networking
         private static readonly JsonSerializerSettings jsonSettings =
             new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
 
-        public static string Serialize(ClientMessage message)
+        internal static string Serialize(ClientMessage message)
             => JsonConvert.SerializeObject(message, jsonSettings);
     }
 }

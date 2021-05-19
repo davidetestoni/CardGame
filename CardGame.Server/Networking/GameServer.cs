@@ -9,6 +9,9 @@ using System.Threading;
 
 namespace CardGame.Server.Networking
 {
+    /// <summary>
+    /// The game server that talks with the clients.
+    /// </summary>
     public class GameServer
     {
         private readonly ClientMessageHandler clientMessageHandler;
@@ -19,11 +22,29 @@ namespace CardGame.Server.Networking
 
         private readonly Dictionary<NetPeer, Guid> peerIds = new Dictionary<NetPeer, Guid>();
 
+        /// <summary>
+        /// The key that clients need to send in order to be able to connect.
+        /// </summary>
         public string Key { get; private set; }
+
+        /// <summary>
+        /// The list of connected clients.
+        /// </summary>
         public List<NetPeer> ConnectedClients => server.ConnectedPeerList;
-        
+
+        /// <summary>
+        /// Called when a client connected to the game server.
+        /// </summary>
         public event EventHandler<Guid> ClientConnected;
+
+        /// <summary>
+        /// Called when a raw message is received from the client.
+        /// </summary>
         public event EventHandler<ClientMessageWrapper> MessageReceived;
+
+        /// <summary>
+        /// Called when a raw message is sent to the server.
+        /// </summary>
         public event EventHandler<ClientMessageWrapper> MessageSent;
 
         public GameServer(ClientMessageHandler clientMessageHandler)
@@ -40,6 +61,10 @@ namespace CardGame.Server.Networking
             }
         }
 
+        /// <summary>
+        /// Starts the game server on the given <paramref name="host"/> and
+        /// <paramref name="port"/>. Generates a random access <see cref="Key"/>.
+        /// </summary>
         public GameServer Start(string host, int port)
         {
             listener = new EventBasedNetListener();
@@ -93,6 +118,9 @@ namespace CardGame.Server.Networking
             return this;
         }
 
+        /// <summary>
+        /// Sends a raw <paramref name="message"/> to both clients with the given <paramref name="deliveryMethod"/>.
+        /// </summary>
         public void BroadcastMessage(string message, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
         {
             foreach (var peerId in peerIds.Values)
@@ -101,6 +129,9 @@ namespace CardGame.Server.Networking
             }
         }
 
+        /// <summary>
+        /// Sends a raw <paramref name="message"/> to a client with the given <paramref name="deliveryMethod"/>.
+        /// </summary>
         public void SendMessage(string message, Guid peerId, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
         {
             NetDataWriter writer = new NetDataWriter();
@@ -110,6 +141,9 @@ namespace CardGame.Server.Networking
             MessageSent?.Invoke(this, new ClientMessageWrapper(message, peerId));
         }
 
+        /// <summary>
+        /// Closes all connections and stops the server.
+        /// </summary>
         public void Close()
         {
             worker.CancelAsync();

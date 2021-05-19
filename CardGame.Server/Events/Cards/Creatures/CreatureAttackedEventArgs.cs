@@ -2,7 +2,7 @@
 
 namespace CardGame.Server.Events.Cards.Creatures
 {
-    public class CreatureAttackedEvent : GameEvent
+    public class CreatureAttackedEventArgs : GameEventArgs
     {
         public CardInstance Attacker { get; set; }
         public CardInstance Defender { get; set; }

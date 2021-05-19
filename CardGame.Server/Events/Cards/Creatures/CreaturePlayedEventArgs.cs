@@ -3,7 +3,7 @@ using CardGame.Server.Instances.Cards;
 
 namespace CardGame.Server.Events.Cards.Creatures
 {
-    public class CreaturePlayedEvent : GameEvent
+    public class CreaturePlayedEventArgs : GameEventArgs
     {
         public PlayerInstance Player { get; set; }
         public CreatureCardInstance Creature { get; set; }

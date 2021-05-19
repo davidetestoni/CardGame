@@ -27,7 +27,7 @@ namespace CardGame.Client.Handlers
         /// </summary>
         public event EventHandler<Exception> Exception;
 
-        public void Handle(string str)
+        internal void Handle(string str)
         {
             ServerMessage message;
 

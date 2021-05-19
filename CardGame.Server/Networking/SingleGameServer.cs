@@ -13,23 +13,53 @@ using System.Threading;
 
 namespace CardGame.Server.Networking
 {
+    /// <summary>
+    /// A server that can host a single game of cards.
+    /// </summary>
     public class SingleGameServer
     {
+        /// <summary>
+        /// The local replica of the game.
+        /// </summary>
         public GameInstance Game { get; private set; }
+
+        /// <summary>
+        /// Handles messages from the clients.
+        /// </summary>
         public ClientMessageHandler ClientMessageHandler { get; private set; }
+
+        /// <summary>
+        /// Handles messages from the server.
+        /// </summary>
         public ServerMessageHandler ServerMessageHandler { get; private set; }
+
+        /// <summary>
+        /// Handles game events that happen, also due to player actions.
+        /// </summary>
         public GameEventHandler GameEventHandler { get; private set; }
+
+        /// <summary>
+        /// Handles actions that performed by players during the game.
+        /// </summary>
         public PlayerActionHandler PlayerActionHandler { get; private set; }
+
+        /// <summary>
+        /// The underlying network server that manages the connection to the clients.
+        /// </summary>
         public GameServer InnerServer { get; private set; }
 
         private readonly CardInstanceFactory cardInstanceFactory;
         private readonly GameInstanceFactory gameInstanceFactory;
 
+        /// <summary>
+        /// Called when a player joined the game.
+        /// </summary>
         public event EventHandler<PlayerInstance> PlayerJoined;
 
         /// <summary>
-        /// Starts a server on the given <paramref name="port"/> that can host a single game
-        /// which supports cards from the provided <paramref name="cardsAssembly"/>.
+        /// Starts a server on the given <paramref name="host"/> and <paramref name="port"/> that
+        /// can host a single game (with the given <paramref name="options"/>) which supports cards
+        /// from the provided <paramref name="cardsAssembly"/>.
         /// </summary>
         public SingleGameServer(string host, int port, GameInstanceOptions options, Assembly cardsAssembly)
         {
@@ -53,7 +83,7 @@ namespace CardGame.Server.Networking
                 case JoinGameRequest x:
                     if (Game.PlayerOne == null)
                     {
-                        Game.PlayerOne = gameInstanceFactory.CreatePlayer(Game, new Player
+                        Game.PlayerOne = gameInstanceFactory.AddPlayer(Game, new Player
                         {
                             Name = x.PlayerName,
                             Deck = x.Deck,
@@ -78,7 +108,7 @@ namespace CardGame.Server.Networking
                         }
                         else
                         {
-                            Game.PlayerTwo = gameInstanceFactory.CreatePlayer(Game, new Player
+                            Game.PlayerTwo = gameInstanceFactory.AddPlayer(Game, new Player
                             {
                                 Name = x.PlayerName,
                                 Deck = x.Deck,

@@ -5,6 +5,9 @@ using CardGame.Shared.Models.Cards;
 
 namespace CardGame.Server.Instances.Cards
 {
+    /// <summary>
+    /// Server-side instance of a creature card.
+    /// </summary>
     public class CreatureCardInstance : CardInstance
     {
         // ------------
@@ -94,8 +97,6 @@ namespace CardGame.Server.Instances.Cards
                     Health = 0;
                 }
             }
-
-            // TODO: Notify client about damage
         }
 
         /// <summary>
@@ -111,10 +112,7 @@ namespace CardGame.Server.Instances.Cards
         /// </summary>
         /// <param name="destructionSource">The card that destroyed this card</param>
         /// <param name="target">The card that was destroyed</param>
-        public virtual void OnCardDestroyed(CardInstance destructionSource, CreatureCardInstance target)
-        {
-            // TODO: Notify client about destruction
-        }
+        public virtual void OnCardDestroyed(CardInstance destructionSource, CreatureCardInstance target) { }
 
         /// <summary>
         /// Called before an attack is performed against a card.

@@ -38,7 +38,7 @@ namespace CardGame.Client.Handlers
                     break;
 
                 case GameEndedMessage x:
-                    game.EndGame(x.WinnerId, x.Surrender);
+                    game.EndGame(x.WinnerId, x.Surrendered);
                     break;
 
                 case NewTurnMessage x:

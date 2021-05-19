@@ -12,18 +12,16 @@ using System.Linq;
 namespace CardGame.Server.Handlers
 {
     /// <summary>
-    /// The purpose of this class is to listen to game events and turn them into
+    /// The purpose of this class is to listen to game events of a <see cref="GameInstance"/> and turn them into
     /// messages of type <see cref="ServerMessage"/> that are sent to the clients.
     /// </summary>
     public class GameEventHandler
     {
         private readonly GameInstance game;
-        private readonly ServerMessageHandler serverMessageHandler;
 
         public GameEventHandler(GameInstance game, ServerMessageHandler serverMessageHandler)
         {
             this.game = game;
-            this.serverMessageHandler = serverMessageHandler;
 
             #region Game Events
             game.GameStarted += (sender, e) =>

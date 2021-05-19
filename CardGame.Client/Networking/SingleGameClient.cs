@@ -37,7 +37,7 @@ namespace CardGame.Client.Networking
         public GameEventHandler GameEventHandler { get; private set; }
 
         /// <summary>
-        /// Handles actions that can be performed by a user during the game.
+        /// Handles actions that can be performed by a player during the game.
         /// </summary>
         public PlayerActionHandler PlayerActionHandler { get; private set; }
 
@@ -55,7 +55,7 @@ namespace CardGame.Client.Networking
         private readonly Player player;
 
         /// <summary>
-        /// Called when a game is joined, and returns the id of your player in the game.
+        /// Called when a game is joined, and gives information about the id of your player in the game.
         /// </summary>
         public event EventHandler<Guid> GameJoined;
 

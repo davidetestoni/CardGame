@@ -2,7 +2,7 @@
 
 namespace CardGame.Server.Events.Game
 {
-    public class GameStartedEvent : GameEvent
+    public class GameStartedEventArgs : GameEventArgs
     {
         public PlayerInstance CurrentPlayer { get; set; }
     }

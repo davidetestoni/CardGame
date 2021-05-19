@@ -1,10 +1,12 @@
 ﻿using CardGame.Server.Instances.Cards;
-using CardGame.Shared.Models.Cards;
 using System;
 using System.Collections.Generic;
 
 namespace CardGame.Server.Instances.Players
 {
+    /// <summary>
+    /// Represents a player of a <see cref="Game.GameInstance"/>.
+    /// </summary>
     public class PlayerInstance
     {
         public Guid Id { get; set; }

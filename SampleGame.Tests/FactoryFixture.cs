@@ -30,18 +30,6 @@ namespace SampleGame.Tests
             return GameFactory.Create(options, playerOne, playerTwo);
         }
 
-        // Creates a test player with a deck made only of basic soldiers
-        // Use this to test basic mechanics of the game
-        private static Player CreateTestPlayer(string name, int deckSize)
-            => new()
-            {
-                Name = name,
-                Deck = new Dictionary<string, int>
-                {
-                    { "BasicSoldier", deckSize }
-                }
-            };
-
         /// <summary>
         /// Creates a sample game with 2 players and test decks.
         /// </summary>
@@ -53,6 +41,18 @@ namespace SampleGame.Tests
 
             return GameFactory.Create(options, playerOne, playerTwo);
         }
+
+        // Creates a test player with a deck made only of basic soldiers
+        // Use this to test basic mechanics of the game
+        private static Player CreateTestPlayer(string name, int deckSize)
+            => new()
+            {
+                Name = name,
+                Deck = new Dictionary<string, int>
+                {
+                    { "BasicSoldier", deckSize }
+                }
+            };
 
         // Creates a sample player with a working deck
         private static Player CreateSamplePlayer(string name)

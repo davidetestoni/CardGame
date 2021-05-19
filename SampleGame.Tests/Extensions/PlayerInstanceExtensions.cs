@@ -13,6 +13,9 @@ namespace SampleGame.Tests.Extensions
         public static CreatureCardInstance GetCreatureOnField<T>(this PlayerInstance player) where T : CreatureCard
             => player.Field.FirstOrDefault(c => c.Base is T);
 
+        /// <summary>
+        /// Helper method that gets a creature of a certain type in the player's hand.
+        /// </summary>
         public static CreatureCardInstance GetCreatureInHand<T>(this PlayerInstance player) where T : CreatureCard
             => player.Hand.FirstOrDefault(c => c is T) as CreatureCardInstance;
     }

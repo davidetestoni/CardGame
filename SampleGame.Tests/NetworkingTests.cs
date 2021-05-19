@@ -1,12 +1,11 @@
-﻿using CardGame.Client.Handlers;
-using CardGame.Client.Networking;
-using CardGame.Server.Handlers;
+﻿using CardGame.Client.Networking;
 using CardGame.Server.Networking;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace SampleGame.Tests
 {
+    // TODO: Add E2E tests to make sure both GameInstances are synchronized properly.
     public class NetworkingTests
     {
         [Fact]
@@ -26,18 +25,6 @@ namespace SampleGame.Tests
             await Task.Delay(1000);
 
             Assert.Equal("HELLO", serverHello);
-        }
-
-        [Fact]
-        public async Task StartServer_ConnectClients_GameStarts()
-        {
-
-        }
-
-        private void BootstrapServer(int port)
-        {
-            var clientMessageHandler = new CardGame.Server.Handlers.ClientMessageHandler();
-            var server = new GameServer(clientMessageHandler).Start("127.0.0.1", port);
         }
     }
 }

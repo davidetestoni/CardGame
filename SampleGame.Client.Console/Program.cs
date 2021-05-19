@@ -91,9 +91,10 @@ namespace SampleGame.Client.Console
             System.Console.ReadLine();
         }
 
+        #region Logging
         private static void BindGameEvents()
         {
-            client.Game.GameStarted += (sender, e) => 
+            client.Game.GameStarted += (sender, e) =>
             {
                 Log.FormattedGameEvent($"Game started. Your opponent is [darkorange]{client.Game.Opponent.Name}[/]. [darkorange]{e.CurrentPlayer.Name}[/] goes first");
 
@@ -136,74 +137,6 @@ namespace SampleGame.Client.Console
             AnsiConsole.WriteLine();
             LogField(client.Game.Opponent);
             AnsiConsole.WriteLine();
-        }
-
-        private static void ProcessPlayerAction()
-        {
-            CHOOSEACTION:
-            var choice = MultipleChoiceInt("What do you want to do?", new List<string>
-            {
-                "Play card from hand",
-                "Attack player",
-                "Attack creature",
-                "End turn",
-                "Surrender"
-            });
-
-            switch (choice)
-            {
-                case 0:
-                    var card = MultipleChoiceCard("Select the card", client.Game.Me.Hand);
-                    if (card == null)
-                    {
-                        goto CHOOSEACTION;
-                    }
-                    client.PlayerActionHandler.PerformAction(new PlayCardAction
-                    {
-                        Card = card
-                    });
-                    break;
-
-                case 1:
-                    var attacker = MultipleChoiceCreature("Select the attacker", client.Game.Me.Field.Where(c => c.CanAttack));
-                    if (attacker == null)
-                    {
-                        goto CHOOSEACTION;
-                    }
-                    client.PlayerActionHandler.PerformAction(new AttackPlayerAction
-                    {
-                        Attacker = attacker
-                    });
-                    break;
-
-                case 2:
-                    CHOOSECREATURE:
-                    attacker = MultipleChoiceCreature("Select the attacker", client.Game.Me.Field.Where(c => c.CanAttack));
-                    if (attacker == null)
-                    {
-                        goto CHOOSEACTION;
-                    }
-                    var target = MultipleChoiceCreature("Select the target", client.Game.Opponent.Field);
-                    if (target == null)
-                    {
-                        goto CHOOSECREATURE;
-                    }
-                    client.PlayerActionHandler.PerformAction(new AttackCreatureAction
-                    {
-                        Attacker = attacker,
-                        Target = target
-                    });
-                    break;
-
-                case 3:
-                    client.PlayerActionHandler.PerformAction(new EndTurnAction());
-                    justEndedTurn = true;
-                    break;
-
-                case 4:
-                    client.PlayerActionHandler.PerformAction(new SurrenderAction());
-                    break;
-            }
         }
 
         private static void LogDeck()
@@ -270,6 +203,76 @@ namespace SampleGame.Client.Console
 
             AnsiConsole.Render(table);
         }
+        #endregion
+
+        #region User Inputs
+        private static void ProcessPlayerAction()
+        {
+        CHOOSEACTION:
+            var choice = MultipleChoiceInt("What do you want to do?", new List<string>
+            {
+                "Play card from hand",
+                "Attack player",
+                "Attack creature",
+                "End turn",
+                "Surrender"
+            });
+
+            switch (choice)
+            {
+                case 0:
+                    var card = MultipleChoiceCard("Select the card", client.Game.Me.Hand);
+                    if (card == null)
+                    {
+                        goto CHOOSEACTION;
+                    }
+                    client.PlayerActionHandler.PerformAction(new PlayCardAction
+                    {
+                        Card = card
+                    });
+                    break;
+
+                case 1:
+                    var attacker = MultipleChoiceCreature("Select the attacker", client.Game.Me.Field.Where(c => c.CanAttack));
+                    if (attacker == null)
+                    {
+                        goto CHOOSEACTION;
+                    }
+                    client.PlayerActionHandler.PerformAction(new AttackPlayerAction
+                    {
+                        Attacker = attacker
+                    });
+                    break;
+
+                case 2:
+                CHOOSECREATURE:
+                    attacker = MultipleChoiceCreature("Select the attacker", client.Game.Me.Field.Where(c => c.CanAttack));
+                    if (attacker == null)
+                    {
+                        goto CHOOSEACTION;
+                    }
+                    var target = MultipleChoiceCreature("Select the target", client.Game.Opponent.Field);
+                    if (target == null)
+                    {
+                        goto CHOOSECREATURE;
+                    }
+                    client.PlayerActionHandler.PerformAction(new AttackCreatureAction
+                    {
+                        Attacker = attacker,
+                        Target = target
+                    });
+                    break;
+
+                case 3:
+                    client.PlayerActionHandler.PerformAction(new EndTurnAction());
+                    justEndedTurn = true;
+                    break;
+
+                case 4:
+                    client.PlayerActionHandler.PerformAction(new SurrenderAction());
+                    break;
+            }
+        }
 
         private static string MultipleChoice(string title, IList<string> choices)
             => AnsiConsole.Prompt(
@@ -305,5 +308,6 @@ namespace SampleGame.Client.Console
                     .UseConverter(card => card == null 
                         ? "Back"
                         : $"[darkorange]{card.Base.Name}[/] [red]{card.Health}[/] [dodgerblue1]{card.Attack}[/]"));
+        #endregion
     }
 }

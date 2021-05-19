@@ -37,6 +37,8 @@ namespace SampleGame.Client.Web.Pages
             client = new SingleGameClient(typeof(BasicSoldier).Assembly, new Player
             {
                 Name = connectionInfo.Name,
+
+                // TODO: Let users customize their deck
                 Deck = new Dictionary<string, int>
                 {
                     { "BasicSoldier", 10 },

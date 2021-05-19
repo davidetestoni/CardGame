@@ -43,7 +43,7 @@ namespace SampleGame.Server
                     => Log.ServerMessage(message.Body, message.SenderId);
             }
 
-            server.ClientMessageHandler.InvalidMessageReceived += (sender, message) 
+            server.ClientMessageHandler.InvalidMessageReceived += (sender, message)
                 => Log.Error($"Invalid message: {message.Body}");
 
             server.ClientMessageHandler.Exception += (sender, ex)
@@ -59,6 +59,7 @@ namespace SampleGame.Server
             Console.ReadLine();
         }
 
+        #region Logging
         private static void BindGameEvents()
         {
             server.Game.GameStarted += (sender, e) =>
@@ -185,5 +186,6 @@ namespace SampleGame.Server
 
             AnsiConsole.Render(table);
         }
+        #endregion
     }
 }

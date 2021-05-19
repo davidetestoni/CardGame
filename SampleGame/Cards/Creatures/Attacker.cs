@@ -22,6 +22,7 @@ namespace SampleGame.Cards.Creatures
 
     public class AttackerInstance : CreatureCardInstance
     {
-        public override int GetAttackDamage(CreatureCardInstance target, bool isDefending) => Attack + 1;
+        public override int GetAttackDamage(CreatureCardInstance target, bool isAttacking)
+            => isAttacking ? Attack + 1 : Attack;
     }
 }

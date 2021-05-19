@@ -55,14 +55,17 @@ namespace CardGame.Server.Instances.Cards
         #region Virtual Methods
         /// <summary>
         /// Called before this card attacks another card. Returns the damage dealt by this card.
+        /// If the card is attacking (and not defending from an attack) <paramref name="isAttacking"/> is true.
         /// </summary>
         /// <param name="target">The card that is being attacked</param>
-        public virtual int GetAttackDamage(CreatureCardInstance target, bool isDefending) => Attack;
+        /// <param name="isAttacking">true if the card is performing the attack, false if it's receiving it</param>
+        public virtual int GetAttackDamage(CreatureCardInstance target, bool isAttacking) => Attack;
 
         /// <summary>
         /// Called when this card is attacked by another card. Return the damage taken.
         /// </summary>
-        public virtual int ComputeDamageTaken(CreatureCardInstance attacker, int attackDamage, bool isDefending) => attackDamage;
+        /// /// <param name="isAttacking">true if the card is performing the attack, false if it's receiving it</param>
+        public virtual int ComputeDamageTaken(CreatureCardInstance attacker, int attackDamage, bool isAttacking) => attackDamage;
 
         /// <summary>
         /// Called before this card attacks a player. Returns the damage dealt by this card.

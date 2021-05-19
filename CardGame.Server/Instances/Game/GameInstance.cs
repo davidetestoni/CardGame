@@ -239,8 +239,8 @@ namespace CardGame.Server.Instances.Game
             SetAttacksLeft(attacker, attacker.AttacksLeft - 1);
 
             // Calculate the attack damage
-            var attackDamage = attacker.GetAttackDamage(defender, false);
-            var defenderAttackDamage = defender.GetAttackDamage(attacker, true);
+            var attackDamage = attacker.GetAttackDamage(defender, true);
+            var defenderAttackDamage = defender.GetAttackDamage(attacker, false);
             
             // Calculate the damage taken
             var damage = defender.ComputeDamageTaken(attacker, attackDamage, true);

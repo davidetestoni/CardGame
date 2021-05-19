@@ -4,6 +4,9 @@ using System;
 
 namespace CardGame.Client.Instances.Cards
 {
+    /// <summary>
+    /// Client-side instance of a card.
+    /// </summary>
     public class CardInstance
     {
         /// <summary>

@@ -1,5 +1,8 @@
 ﻿namespace CardGame.Client.Instances.Players
 {
+    /// <summary>
+    /// The opponent's <see cref="PlayerInstance"/>.
+    /// </summary>
     public class OpponentInstance : PlayerInstance
     {
         /// <summary>

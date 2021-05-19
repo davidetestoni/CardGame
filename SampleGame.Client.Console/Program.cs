@@ -221,7 +221,7 @@ namespace SampleGame.Client.Console
             AnsiConsole.Render(table);
         }
 
-        private static void LogCardsDrawn(CardsDrawnEvent e)
+        private static void LogCardsDrawn(CardsDrawnEventArgs e)
         {
             Log.FormattedGameEvent($"[darkorange]You[/] drew [greenyellow]{e.NewCards.Count}[/] card(s)");
 

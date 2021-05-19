@@ -2,7 +2,7 @@
 
 namespace CardGame.Client.Events.Players
 {
-    public class PlayerHealthRestoredEvent : GameEvent
+    public class PlayerManaSpentEventArgs : GameEventArgs
     {
         public PlayerInstance Player { get; set; }
         public int Amount { get; set; }

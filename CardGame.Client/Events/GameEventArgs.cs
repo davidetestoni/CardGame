@@ -2,7 +2,10 @@
 
 namespace CardGame.Client.Events
 {
-    public class GameEvent
+    /// <summary>
+    /// Data of a game event.
+    /// </summary>
+    public class GameEventArgs : EventArgs
     {
         public DateTime Time { get; set; } = DateTime.Now;
     }

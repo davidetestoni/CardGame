@@ -1,9 +1,11 @@
 ﻿using CardGame.Client.Instances.Cards;
-using CardGame.Shared.Models.Cards;
 using System.Collections.Generic;
 
 namespace CardGame.Client.Instances.Players
 {
+    /// <summary>
+    /// Your <see cref="PlayerInstance"/>.
+    /// </summary>
     public class MeInstance : PlayerInstance
     {
         /// <summary>

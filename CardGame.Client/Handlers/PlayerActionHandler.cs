@@ -1,8 +1,6 @@
 ﻿using CardGame.Client.Models.PlayerActions;
 using CardGame.Client.Models.PlayerActions.Cards.Creatures;
 using CardGame.Client.Models.PlayerActions.Game;
-using CardGame.Client.Networking;
-using CardGame.Server.Networking;
 using CardGame.Shared.Messages.Client;
 using CardGame.Shared.Messages.Client.Cards.Creatures;
 using CardGame.Shared.Messages.Client.Game;
@@ -12,8 +10,8 @@ using System;
 namespace CardGame.Client.Handlers
 {
     /// <summary>
-    /// The purpose of this class is to take player actions, turn them into messages
-    /// of type <see cref="ClientMessage"/> and send them to the server.
+    /// Takes player actions, turns them into messages of type <see cref="ClientMessage"/>
+    /// and send them to the server.
     /// </summary>
     public class PlayerActionHandler
     {
@@ -24,6 +22,10 @@ namespace CardGame.Client.Handlers
             this.clientMessageHandler = clientMessageHandler;
         }
 
+        /// <summary>
+        /// Performs an <paramref name="action"/> by sending it to the server with the
+        /// given <paramref name="deliveryMethod"/>.
+        /// </summary>
         public void PerformAction(PlayerAction action, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
         {
             ClientMessage message;
@@ -54,7 +56,7 @@ namespace CardGame.Client.Handlers
                     throw new NotImplementedException();
             }
 
-            clientMessageHandler.SendMessage(message);
+            clientMessageHandler.SendMessage(message, deliveryMethod);
         }
     }
 }

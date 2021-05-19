@@ -11,7 +11,7 @@ using System.Reflection;
 namespace CardGame.Client.Factories
 {
     /// <summary>
-    /// This is the factory that provides instances of cards basing on their base values.
+    /// This is the factory that provides instances of cards declared in an <see cref="Assembly"/>.
     /// </summary>
     public class CardInstanceFactory
     {
@@ -32,13 +32,15 @@ namespace CardGame.Client.Factories
         }
 
         /// <summary>
-        /// Create a <see cref="CardInstance"/> from a <paramref name="shortName"/> and an <paramref name="id"/>.
+        /// Creates a <see cref="CardInstance"/> from a <paramref name="shortName"/> and an <paramref name="id"/>,
+        /// and also sets its <paramref name="owner"/>.
         /// </summary>
         public CardInstance Create(string shortName, Guid id, PlayerInstance owner)
             => Create(_cards.First(c => c.ShortName == shortName), id, owner);
 
         /// <summary>
-        /// Create a <see cref="CardInstance"/> from a base card of type <typeparamref name="T"/> and an <paramref name="id"/>.
+        /// Create a <see cref="CardInstance"/> from a base card of type <typeparamref name="T"/> and an <paramref name="id"/>,
+        /// and also sets its <paramref name="owner"/>.
         /// </summary>
         public CardInstance Create<T>(Guid id, PlayerInstance owner) where T : Card
             => Create(_cards.First(c => c is T), id, owner);

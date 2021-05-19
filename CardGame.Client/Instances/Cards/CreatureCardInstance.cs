@@ -2,6 +2,9 @@
 
 namespace CardGame.Client.Instances.Cards
 {
+    /// <summary>
+    /// Client-side instance of a creature card.
+    /// </summary>
     public class CreatureCardInstance : CardInstance
     {
         /// <summary>

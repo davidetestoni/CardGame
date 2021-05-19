@@ -11,24 +11,56 @@ using System.Reflection;
 
 namespace CardGame.Client.Networking
 {
+    /// <summary>
+    /// A client that can join a single game of cards.
+    /// </summary>
     public class SingleGameClient
     {
+        /// <summary>
+        /// The local replica of the game, synchronized with the one on the server.
+        /// </summary>
         public GameInstance Game { get; private set; }
+
+        /// <summary>
+        /// Handles messages from the server.
+        /// </summary>
         public ServerMessageHandler ServerMessageHandler { get; private set; }
+
+        /// <summary>
+        /// Handles messages from the client.
+        /// </summary>
         public ClientMessageHandler ClientMessageHandler { get; private set; }
+
+        /// <summary>
+        /// Handles game events that happen because of a server message.
+        /// </summary>
         public GameEventHandler GameEventHandler { get; private set; }
+
+        /// <summary>
+        /// Handles actions that can be performed by a user during the game.
+        /// </summary>
         public PlayerActionHandler PlayerActionHandler { get; private set; }
+
+        /// <summary>
+        /// The underlying network client that manages the connection to the server.
+        /// </summary>
         public GameClient InnerClient { get; private set; }
+
+        /// <summary>
+        /// The id of this client.
+        /// </summary>
         public Guid MyId { get; private set; }
 
         private readonly CardInstanceFactory cardInstanceFactory;
         private readonly Player player;
 
+        /// <summary>
+        /// Called when a game is joined, and returns the id of your player in the game.
+        /// </summary>
         public event EventHandler<Guid> GameJoined;
 
         /// <summary>
-        /// Starts a client that connects to a server with the given <paramref name="host"/>
-        /// and <paramref name="port"/> that hosts a single game which supports cards
+        /// Starts a client that connects to a server that hosts a single game which supports cards
         /// from the provided <paramref name="cardsAssembly"/>.
         /// </summary>
         public SingleGameClient(Assembly cardsAssembly, Player player)

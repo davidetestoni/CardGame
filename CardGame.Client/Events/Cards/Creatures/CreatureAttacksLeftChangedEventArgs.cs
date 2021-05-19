@@ -2,8 +2,9 @@
 
 namespace CardGame.Client.Events.Cards.Creatures
 {
-    public class CreatureSpawnedEvent : GameEvent
+    public class CreatureAttacksLeftChangedEventArgs : GameEventArgs
     {
         public CreatureCardInstance Creature { get; set; }
+        public bool CanAttack { get; set; }
     }
 }

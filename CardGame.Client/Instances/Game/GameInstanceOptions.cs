@@ -1,5 +1,8 @@
 ﻿namespace CardGame.Client.Instances.Game
 {
+    /// <summary>
+    /// Options of a <see cref="GameInstance"/>.
+    /// </summary>
     public class GameInstanceOptions
     {
         /// <summary>

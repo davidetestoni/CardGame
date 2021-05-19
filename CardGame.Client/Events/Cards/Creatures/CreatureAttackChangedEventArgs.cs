@@ -2,7 +2,7 @@
 
 namespace CardGame.Client.Events.Cards.Creatures
 {
-    public class CreatureAttackChangedEvent : GameEvent
+    public class CreatureAttackChangedEventArgs : GameEventArgs
     {
         public CreatureCardInstance Creature { get; set; }
         public int OldValue { get; set; }

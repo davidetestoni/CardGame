@@ -8,10 +8,18 @@ using System;
 
 namespace CardGame.Client.Handlers
 {
+    /// <summary>
+    /// Handles game events coming from the server by applying the
+    /// changes to the local <see cref="GameInstance"/>.
+    /// </summary>
     public class GameEventHandler
     {
         private readonly GameInstance game;
         
+        /// <summary>
+        /// Called when the server sends an error message, for example
+        /// when you're trying to perform a forbidden action.
+        /// </summary>
         public event EventHandler<string> Error;
 
         public GameEventHandler(GameInstance game, ServerMessageHandler serverMessageHandler)

@@ -4,18 +4,31 @@ using System;
 
 namespace CardGame.Client.Handlers
 {
+    /// <summary>
+    /// Handles deserializing messages from the server.
+    /// </summary>
     public class ServerMessageHandler
     {
         private readonly JsonSerializerSettings jsonSettings =
             new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto };
 
+        /// <summary>
+        /// An message has been received from the server but the deserialization failed.
+        /// </summary>
         public event EventHandler<string> InvalidMessageReceived;
+
+        /// <summary>
+        /// A valid message has been received from the server and deserialized.
+        /// </summary>
         public event EventHandler<ServerMessage> MessageReceived;
+
+        /// <summary>
+        /// An exception other than a <see cref="JsonException"/> occurred during the deserialization.
+        /// </summary>
         public event EventHandler<Exception> Exception;
 
         public void Handle(string str)
         {
-            // Try to deserialize the message
             ServerMessage message;
 
             try

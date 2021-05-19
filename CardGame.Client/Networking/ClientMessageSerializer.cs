@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace CardGame.Server.Networking
 {
-    public static class ClientMessageSerializer
+    internal static class ClientMessageSerializer
     {
         private static readonly JsonSerializerSettings jsonSettings =
             new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };

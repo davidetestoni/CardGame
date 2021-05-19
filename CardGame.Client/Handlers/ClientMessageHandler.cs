@@ -5,6 +5,9 @@ using LiteNetLib;
 
 namespace CardGame.Client.Handlers
 {
+    /// <summary>
+    /// Handles serializing and sending messages from the client to the server.
+    /// </summary>
     public class ClientMessageHandler
     {
         private readonly GameClient client;

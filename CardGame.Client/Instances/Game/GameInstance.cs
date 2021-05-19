@@ -12,44 +12,149 @@ using System.Linq;
 
 namespace CardGame.Client.Instances.Game
 {
+    /// <summary>
+    /// Client-side instance of the game, synchronized with the server
+    /// through messaging and events.
+    /// </summary>
     public class GameInstance
     {
         private readonly CardInstanceFactory cardInstanceFactory;
 
+        /// <summary>
+        /// The id of the game.
+        /// </summary>
         public Guid Id { get; set; }
 
+        /// <summary>
+        /// You.
+        /// </summary>
         public MeInstance Me { get; set; }
+
+        /// <summary>
+        /// Your opponent.
+        /// </summary>
         public OpponentInstance Opponent { get; set; }
 
+        /// <summary>
+        /// How many turns have passed since the beginning of the game.
+        /// </summary>
         public int TurnNumber { get; set; } = 1;
+
+        /// <summary>
+        /// Whether it's your turn to play.
+        /// </summary>
         public bool MyTurn { get; set; } = false;
 
+        /// <summary>
+        /// The status of the game.
+        /// </summary>
         public GameStatus Status { get; set; } = GameStatus.Created;
+
+        /// <summary>
+        /// The winner of the game (if the game hasn't ended yet, the winner is null).
+        /// </summary>
         public PlayerInstance Winner { get; set; } = null;
+
+        /// <summary>
+        /// Whether the game finished because of a surrender from either player.
+        /// </summary>
         public bool Surrender { get; set; } = false;
 
         #region Events
-        public event EventHandler<GameStartedEvent> GameStarted;
-        public event EventHandler<GameEndedEvent> GameEnded;
-        public event EventHandler<NewTurnEvent> NewTurn;
-        public event EventHandler<CardsDrawnEvent> CardsDrawn;
-        public event EventHandler<CardsDrawnOpponentEvent> CardsDrawnOpponent;
+        /// <summary>
+        /// Called when the game starts.
+        /// </summary>
+        public event EventHandler<GameStartedEventArgs> GameStarted;
 
-        public event EventHandler<PlayerAttackedEvent> PlayerAttacked;
-        public event EventHandler<PlayerDamagedEvent> PlayerDamaged;
-        public event EventHandler<PlayerHealthRestoredEvent> PlayerHealthRestored;
-        public event EventHandler<PlayerManaRestoredEvent> PlayerManaRestored;
-        public event EventHandler<PlayerManaSpentEvent> PlayerManaSpent;
-        public event EventHandler<PlayerMaxManaIncreasedEvent> PlayerMaxManaIncreased;
+        /// <summary>
+        /// Called when the game ends.
+        /// </summary>
+        public event EventHandler<GameEndedEventArgs> GameEnded;
 
-        public event EventHandler<CreatureAttackChangedEvent> CreatureAttackChanged;
-        public event EventHandler<CreatureAttackedEvent> CreatureAttacked;
-        public event EventHandler<CreatureAttacksLeftChangedEvent> CreatureAttacksLeftChanged;
-        public event EventHandler<CreatureDamagedEvent> CreatureDamaged;
-        public event EventHandler<CreatureDestroyedEvent> CreatureDestroyed;
-        public event EventHandler<CreatureHealthIncreasedEvent> CreatureHealthIncreased;
-        public event EventHandler<CreaturePlayedEvent> CreaturePlayed;
-        public event EventHandler<CreatureSpawnedEvent> CreatureSpawned;
+        /// <summary>
+        /// Called when the current turn ended and a new turn begins.
+        /// </summary>
+        public event EventHandler<NewTurnEventArgs> NewTurn;
+
+        /// <summary>
+        /// Called when you drew cards.
+        /// </summary>
+        public event EventHandler<CardsDrawnEventArgs> CardsDrawn;
+
+        /// <summary>
+        /// Called when your opponent drew cards.
+        /// </summary>
+        public event EventHandler<CardsDrawnOpponentEventArgs> CardsDrawnOpponent;
+
+        /// <summary>
+        /// Called when a player is attacked by a creature.
+        /// </summary>
+        public event EventHandler<PlayerAttackedEventArgs> PlayerAttacked;
+
+        /// <summary>
+        /// Called when a player is damaged by an effect.
+        /// </summary>
+        public event EventHandler<PlayerDamagedEventArgs> PlayerDamaged;
+
+        /// <summary>
+        /// Called when a player's health is restored.
+        /// </summary>
+        public event EventHandler<PlayerHealthRestoredEventArgs> PlayerHealthRestored;
+
+        /// <summary>
+        /// Called when a player's mana is restored.
+        /// </summary>
+        public event EventHandler<PlayerManaRestoredEventArgs> PlayerManaRestored;
+
+        /// <summary>
+        /// Called when a player spends mana.
+        /// </summary>
+        public event EventHandler<PlayerManaSpentEventArgs> PlayerManaSpent;
+
+        /// <summary>
+        /// Called when a player's maximum mana is increased.
+        /// </summary>
+        public event EventHandler<PlayerMaxManaIncreasedEventArgs> PlayerMaxManaIncreased;
+
+        /// <summary>
+        /// Called when the attack of a creature changed.
+        /// </summary>
+        public event EventHandler<CreatureAttackChangedEventArgs> CreatureAttackChanged;
+
+        /// <summary>
+        /// Called when a creature is attacked by another creature.
+        /// </summary>
+        public event EventHandler<CreatureAttackedEventArgs> CreatureAttacked;
+
+        /// <summary>
+        /// Called when the number of times a creature can attack during this turn is changed.
+        /// </summary>
+        public event EventHandler<CreatureAttacksLeftChangedEventArgs> CreatureAttacksLeftChanged;
+
+        /// <summary>
+        /// Called when a creature is damaged by an effect.
+        /// </summary>
+        public event EventHandler<CreatureDamagedEventArgs> CreatureDamaged;
+
+        /// <summary>
+        /// Called when a creature is destroyed.
+        /// </summary>
+        public event EventHandler<CreatureDestroyedEventArgs> CreatureDestroyed;
+
+        /// <summary>
+        /// Called when a creature's health is increased.
+        /// </summary>
+        public event EventHandler<CreatureHealthIncreasedEventArgs> CreatureHealthIncreased;
+        
+        /// <summary>
+        /// Called when a creature is played from a player's hand.
+        /// </summary>
+        public event EventHandler<CreaturePlayedEventArgs> CreaturePlayed;
+
+        /// <summary>
+        /// Called when a creature is spawned on the field.
+        /// </summary>
+        public event EventHandler<CreatureSpawnedEventArgs> CreatureSpawned;
         #endregion
 
         public GameInstance(CardInstanceFactory cardInstanceFactory)
@@ -57,6 +162,9 @@ namespace CardGame.Client.Instances.Game
             this.cardInstanceFactory = cardInstanceFactory;
         }
 
+        /// <summary>
+        /// Gets a player from its <paramref name="id"/>.
+        /// </summary>
         public PlayerInstance GetPlayer(Guid id)
         {
             if (Me.Id == id)
@@ -70,7 +178,7 @@ namespace CardGame.Client.Instances.Game
         }
 
         #region Game
-        public void StartGame(StartGameInfoDTO gameInfo, bool myTurn, List<CardInfoDTO> deck)
+        internal void StartGame(StartGameInfoDTO gameInfo, bool myTurn, List<CardInfoDTO> deck)
         {
             Opponent = new OpponentInstance
             {
@@ -99,38 +207,38 @@ namespace CardGame.Client.Instances.Game
                 currentPlayer = Opponent;
             }
 
-            GameStarted?.Invoke(this, new GameStartedEvent
+            GameStarted?.Invoke(this, new GameStartedEventArgs
             {
                 CurrentPlayer = currentPlayer
             });
         }
 
-        public void EndGame(Guid winnerId, bool surrender)
+        internal void EndGame(Guid winnerId, bool surrender)
         {
             Winner = GetPlayer(winnerId);
             Surrender = surrender;
             Status = GameStatus.Finished;
 
-            GameEnded?.Invoke(this, new GameEndedEvent
+            GameEnded?.Invoke(this, new GameEndedEventArgs
             {
                 Winner = Winner,
                 Surrender = Surrender
             });
         }
 
-        public void ChangeTurn(Guid currentPlayerId, int turnNumber)
+        internal void ChangeTurn(Guid currentPlayerId, int turnNumber)
         {
             MyTurn = currentPlayerId == Me.Id;
             TurnNumber = turnNumber;
 
-            NewTurn?.Invoke(this, new NewTurnEvent
+            NewTurn?.Invoke(this, new NewTurnEventArgs
             {
                 CurrentPlayer = GetPlayer(currentPlayerId),
                 TurnNumber = TurnNumber
             });
         }
 
-        public void DrawCards(List<Guid> newCards, List<Guid> destroyed)
+        internal void DrawCards(List<Guid> newCards, List<Guid> destroyed)
         {
             var instances = new List<CardInstance>();
             var destroyedInstances = new List<CardInstance>();
@@ -153,14 +261,14 @@ namespace CardGame.Client.Instances.Game
 
             Me.Graveyard.AddRange(destroyedInstances);
 
-            CardsDrawn?.Invoke(this, new CardsDrawnEvent
+            CardsDrawn?.Invoke(this, new CardsDrawnEventArgs
             {
                 NewCards = instances,
                 Destroyed = destroyedInstances
             });
         }
 
-        public void DrawCardsOpponent(int amount, List<CardInfoDTO> destroyed)
+        internal void DrawCardsOpponent(int amount, List<CardInfoDTO> destroyed)
         {
             var destroyedInstances = new List<CardInstance>();
 
@@ -174,7 +282,7 @@ namespace CardGame.Client.Instances.Game
                 Opponent.DeckSize--;
             }
 
-            CardsDrawnOpponent?.Invoke(this, new CardsDrawnOpponentEvent
+            CardsDrawnOpponent?.Invoke(this, new CardsDrawnOpponentEventArgs
             {
                 Amount = amount,
                 Destroyed = destroyedInstances
@@ -183,11 +291,11 @@ namespace CardGame.Client.Instances.Game
         #endregion
 
         #region Players
-        public void AttackPlayer(Guid attackerId, Guid playerId, int damage)
+        internal void AttackPlayer(Guid attackerId, Guid playerId, int damage)
         {
             GetPlayer(playerId).CurrentHealth -= damage;
 
-            PlayerAttacked?.Invoke(this, new PlayerAttackedEvent
+            PlayerAttacked?.Invoke(this, new PlayerAttackedEventArgs
             {
                 Attacker = GetCreatureOnField(attackerId),
                 Player = GetPlayer(playerId),
@@ -195,55 +303,55 @@ namespace CardGame.Client.Instances.Game
             });
         }
 
-        public void DamagePlayer(Guid playerId, int damage)
+        internal void DamagePlayer(Guid playerId, int damage)
         {
             GetPlayer(playerId).CurrentHealth -= damage;
 
-            PlayerDamaged?.Invoke(this, new PlayerDamagedEvent
+            PlayerDamaged?.Invoke(this, new PlayerDamagedEventArgs
             {
                 Player = GetPlayer(playerId),
                 Damage = damage
             });
         }
 
-        public void RestorePlayerHealth(Guid playerId, int amount)
+        internal void RestorePlayerHealth(Guid playerId, int amount)
         {
             GetPlayer(playerId).CurrentHealth += amount;
 
-            PlayerHealthRestored?.Invoke(this, new PlayerHealthRestoredEvent
+            PlayerHealthRestored?.Invoke(this, new PlayerHealthRestoredEventArgs
             {
                 Player = GetPlayer(playerId),
                 Amount = amount
             });
         }
 
-        public void RestorePlayerMana(Guid playerId, int amount)
+        internal void RestorePlayerMana(Guid playerId, int amount)
         {
             GetPlayer(playerId).CurrentMana += amount;
 
-            PlayerManaRestored?.Invoke(this, new PlayerManaRestoredEvent
+            PlayerManaRestored?.Invoke(this, new PlayerManaRestoredEventArgs
             {
                 Player = GetPlayer(playerId),
                 Amount = amount
             });
         }
 
-        public void SpendPlayerMana(Guid playerId, int amount)
+        internal void SpendPlayerMana(Guid playerId, int amount)
         {
             GetPlayer(playerId).CurrentMana -= amount;
 
-            PlayerManaSpent?.Invoke(this, new PlayerManaSpentEvent
+            PlayerManaSpent?.Invoke(this, new PlayerManaSpentEventArgs
             {
                 Player = GetPlayer(playerId),
                 Amount = amount
             });
         }
 
-        public void IncreasePlayerMaxMana(Guid playerId, int increment)
+        internal void IncreasePlayerMaxMana(Guid playerId, int increment)
         {
             GetPlayer(playerId).MaximumMana += increment;
 
-            PlayerMaxManaIncreased?.Invoke(this, new PlayerMaxManaIncreasedEvent
+            PlayerMaxManaIncreased?.Invoke(this, new PlayerMaxManaIncreasedEventArgs
             {
                 Player = GetPlayer(playerId),
                 Increment = increment
@@ -252,13 +360,13 @@ namespace CardGame.Client.Instances.Game
         #endregion
 
         #region Creatures
-        public void ChangeCreatureAttack(Guid creatureId, int newValue)
+        internal void ChangeCreatureAttack(Guid creatureId, int newValue)
         {
             var creature = GetCreatureOnField(creatureId);
             var oldValue = creature.Attack;
             creature.Attack = newValue;
 
-            CreatureAttackChanged?.Invoke(this, new CreatureAttackChangedEvent
+            CreatureAttackChanged?.Invoke(this, new CreatureAttackChangedEventArgs
             {
                 Creature = creature,
                 OldValue = oldValue,
@@ -266,14 +374,14 @@ namespace CardGame.Client.Instances.Game
             });
         }
 
-        public void AttackCreature(Guid attackedId, Guid defenderId, int damage, int recoilDamage)
+        internal void AttackCreature(Guid attackedId, Guid defenderId, int damage, int recoilDamage)
         {
             var attacker = GetCreatureOnField(attackedId);
             var defender = GetCreatureOnField(defenderId);
             attacker.Health -= recoilDamage;
             defender.Health -= damage;
 
-            CreatureAttacked?.Invoke(this, new CreatureAttackedEvent
+            CreatureAttacked?.Invoke(this, new CreatureAttackedEventArgs
             {
                 Attacker = attacker,
                 Defender = defender,
@@ -282,87 +390,87 @@ namespace CardGame.Client.Instances.Game
             });
         }
 
-        public void ChangeCreatureAttacksLeft(Guid creatureId, bool canAttack)
+        internal void ChangeCreatureAttacksLeft(Guid creatureId, bool canAttack)
         {
             var creature = GetCreatureOnField(creatureId);
             creature.CanAttack = canAttack;
 
-            CreatureAttacksLeftChanged?.Invoke(this, new CreatureAttacksLeftChangedEvent
+            CreatureAttacksLeftChanged?.Invoke(this, new CreatureAttacksLeftChangedEventArgs
             {
                 Creature = creature,
                 CanAttack = canAttack
             });
         }
 
-        public void DamageCreature(Guid creatureId, int damage)
+        internal void DamageCreature(Guid creatureId, int damage)
         {
             var creature = GetCreatureOnField(creatureId);
             creature.Health -= damage;
 
-            CreatureDamaged?.Invoke(this, new CreatureDamagedEvent
+            CreatureDamaged?.Invoke(this, new CreatureDamagedEventArgs
             {
                 Target = creature,
                 Damage = damage
             });
         }
 
-        public void DestroyCreature(Guid creatureId)
+        internal void DestroyCreature(Guid creatureId)
         {
             var creature = GetCreatureOnField(creatureId);
             creature.Owner.Field.Remove(creature);
             creature.Owner.Graveyard.Add(creature);
 
-            CreatureDestroyed?.Invoke(this, new CreatureDestroyedEvent
+            CreatureDestroyed?.Invoke(this, new CreatureDestroyedEventArgs
             {
                 Target = creature
             });
         }
 
-        public void IncreaseCreatureHealth(Guid creatureId, int amount)
+        internal void IncreaseCreatureHealth(Guid creatureId, int amount)
         {
             var creature = GetCreatureOnField(creatureId);
             creature.Health += amount;
 
-            CreatureHealthIncreased?.Invoke(this, new CreatureHealthIncreasedEvent
+            CreatureHealthIncreased?.Invoke(this, new CreatureHealthIncreasedEventArgs
             {
                 Creature = creature,
                 Amount = amount
             });
         }
 
-        public void PlayCreature(Guid creatureId)
+        internal void PlayCreature(Guid creatureId)
         {
             var creature = GetCardInHand(creatureId) as CreatureCardInstance;
             Me.Hand.Remove(creature);
             Me.Field.Add(creature);
 
-            CreaturePlayed?.Invoke(this, new CreaturePlayedEvent
+            CreaturePlayed?.Invoke(this, new CreaturePlayedEventArgs
             {
                 Creature = creature,
                 Player = Me
             });
         }
 
-        public void PlayCreatureOpponent(string shortName, Guid creatureId)
+        internal void PlayCreatureOpponent(string shortName, Guid creatureId)
         {
             var creature = cardInstanceFactory.Create(shortName, creatureId, Opponent) as CreatureCardInstance;
             Opponent.HandSize--;
             Opponent.Field.Add(creature);
 
-            CreaturePlayed?.Invoke(this, new CreaturePlayedEvent
+            CreaturePlayed?.Invoke(this, new CreaturePlayedEventArgs
             {
                 Creature = creature,
                 Player = Opponent
             });
         }
 
-        public void SpawnCreature(string shortName, Guid creatureId, Guid playerId)
+        internal void SpawnCreature(string shortName, Guid creatureId, Guid playerId)
         {
             var player = GetPlayer(playerId);
             var creature = cardInstanceFactory.Create(shortName, creatureId, player) as CreatureCardInstance;
             player.Field.Add(creature);
 
-            CreatureSpawned?.Invoke(this, new CreatureSpawnedEvent
+            CreatureSpawned?.Invoke(this, new CreatureSpawnedEventArgs
             {
                 Creature = creature
             });

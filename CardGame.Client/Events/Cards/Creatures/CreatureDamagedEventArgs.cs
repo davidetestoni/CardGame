@@ -2,7 +2,7 @@
 
 namespace CardGame.Client.Events.Cards.Creatures
 {
-    public class CreatureDamagedEvent : GameEvent
+    public class CreatureDamagedEventArgs : GameEventArgs
     {
         public CardInstance Target { get; set; }
         public int Damage { get; set; }

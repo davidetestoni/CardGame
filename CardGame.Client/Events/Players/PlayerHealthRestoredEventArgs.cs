@@ -2,9 +2,9 @@
 
 namespace CardGame.Client.Events.Players
 {
-    public class PlayerMaxManaIncreasedEvent : GameEvent
+    public class PlayerHealthRestoredEventArgs : GameEventArgs
     {
         public PlayerInstance Player { get; set; }
-        public int Increment { get; set; }
+        public int Amount { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace SampleGame.Cards.Creatures
             ShortName = "Roland";
             Name = "Roland";
             Description = "Basic unit, doesn't do much";
-            Art = "";
+            Art = "Roland";
             
             ManaCost = 1;
             Attack = 1;

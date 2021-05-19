@@ -13,8 +13,8 @@ namespace SampleGame.Cards.Creatures
         {
             ShortName = "Lenny";
             Name = "Lenny";
-            Description = "When played, increase the attack of a random ally by 1";
-            Art = "";
+            Description = "Taunt. When played, increase the attack of a random ally by 1";
+            Art = "Lenny";
 
             ManaCost = 3;
             Attack = 2;

@@ -12,8 +12,8 @@ namespace SampleGame.Cards.Creatures
         {
             ShortName = "Holly";
             Name = "Holly";
-            Description = "After being attacked, restores 2 HP to a random ally.";
-            Art = "";
+            Description = "After being attacked, restores 2 HP to a random ally";
+            Art = "Holly";
 
             ManaCost = 4;
             Attack = 1;

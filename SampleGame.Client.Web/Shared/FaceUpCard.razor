@@ -1,6 +1,7 @@
 ﻿@using CardGame.Client.Instances.Cards
 
-<div class="game-card" style="background-image: url('@Card.Base.Art');">
+<div class="game-card" style="background-image: url('images/cards/@(Card.Base.Art).png');"
+     data-toggle="tooltip" data-placement="right" title="@Card.Base.Description">
     <div class="card-name">
         @Card.Base.Name
     </div>

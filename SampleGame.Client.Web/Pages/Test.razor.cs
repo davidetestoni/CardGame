@@ -29,12 +29,12 @@ namespace SampleGame.Client.Web.Pages
                 HandSize = 9,
                 Field = new List<CreatureCardInstance>
                 {
-                    NewCreature("BasicSoldier"),
-                    NewCreature("Gunner")
+                    NewCreature("Roland"),
+                    NewCreature("Simon")
                 },
                 Graveyard = new List<CardInstance>
                 {
-                    NewCreature("BasicSoldier")
+                    NewCreature("Roland")
                 }
             };
 
@@ -47,27 +47,27 @@ namespace SampleGame.Client.Web.Pages
                 MaximumMana = 6,
                 Deck = new List<CardInstance>
                 {
-                    NewCreature("BasicSoldier"),
-                    NewCreature("BasicSoldier"),
-                    NewCreature("BasicSoldier")
+                    NewCreature("Adrian"),
+                    NewCreature("Roland"),
+                    NewCreature("Roland")
                 },
                 Hand = new List<CardInstance>
                 {
-                    NewCreature("BasicSoldier"),
-                    NewCreature("Attacker"),
-                    NewCreature("Quickshot")
+                    NewCreature("Lizzie"),
+                    NewCreature("Evie"),
+                    NewCreature("Lenny")
                 },
                 Field = new List<CreatureCardInstance>
                 {
-                    NewCreature("BasicSoldier"),
-                    NewCreature("BasicSoldier"),
-                    NewCreature("Medic"),
-                    NewCreature("Defender")
+                    NewCreature("Roland"),
+                    NewCreature("Roland"),
+                    NewCreature("Holly"),
+                    NewCreature("Christie")
                 },
                 Graveyard = new List<CardInstance>
                 {
-                    NewCreature("BasicSoldier"),
-                    NewCreature("BasicSoldier")
+                    NewCreature("Roland"),
+                    NewCreature("Roland")
                 }
             };
         }

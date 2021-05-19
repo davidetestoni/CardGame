@@ -9,23 +9,4 @@
     <ProjectReference Include="..\CardGame.Shared\CardGame.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Resources\Cards.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Cards.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Resources\Cards.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Cards.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\Cards\" />
-  </ItemGroup>
-
 </Project>

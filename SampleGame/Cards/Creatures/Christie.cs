@@ -13,7 +13,7 @@ namespace SampleGame.Cards.Creatures
             ShortName = "Christie";
             Name = "Christie";
             Description = "Spawns 2 Rolands when destroyed";
-            Art = "";
+            Art = "Christie";
 
             ManaCost = 5;
             Attack = 4;

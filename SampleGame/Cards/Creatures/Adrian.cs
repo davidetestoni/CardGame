@@ -13,7 +13,7 @@ namespace SampleGame.Cards.Creatures
             ShortName = "Adrian";
             Name = "Adrian";
             Description = "When you play Adrian, draw a card";
-            Art = "";
+            Art = "Adrian";
 
             ManaCost = 2;
             Attack = 1;

@@ -11,8 +11,8 @@ namespace SampleGame.Cards.Creatures
         {
             ShortName = "Evie";
             Name = "Evie";
-            Description = "Quick unit";
-            Art = "";
+            Description = "Rush";
+            Art = "Evie";
 
             ManaCost = 2;
             Attack = 1;

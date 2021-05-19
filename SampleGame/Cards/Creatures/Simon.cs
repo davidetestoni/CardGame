@@ -12,7 +12,7 @@ namespace SampleGame.Cards.Creatures
             ShortName = "Simon";
             Name = "Simon";
             Description = "Fortified unit";
-            Art = "";
+            Art = "Simon";
 
             ManaCost = 2;
             Attack = 1;

@@ -11,7 +11,7 @@ namespace SampleGame.Cards.Creatures
         {
             ShortName = "Lizzie";
             Name = "Lizzie";
-            Description = "When attacking, deals 1 more damage.";
+            Description = "When attacking, deals 1 more damage";
             Art = "Lizzie";
 
             ManaCost = 2;

@@ -5,6 +5,7 @@
     display: inline block;
     float: left;
     margin: 0px 5px;
+    border: 2px solid white;
 }
 
 .face-down-card {
@@ -12,11 +13,11 @@
 }
 
 .health-info {
-    color: yellowgreen;
+    color: tomato;
 }
 
 .mana-info {
-    color: dodgerblue;
+    color: yellowgreen;
 }
 
 .card-name {
@@ -27,46 +28,41 @@
     font-size: 10px;
     text-align: right;
     padding-right: 5px;
+    margin-left: 5px;
     font-weight: bold;
+    color: black;
+}
+
+.mana-orb, .attack-orb, .health-orb {
+    position: relative;
+    width: 25px;
+    height: 25px;
+    border-radius: 25px;
+    text-align: center;
+    color: black;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .mana-orb {
-    position: relative;
-    width: 25px;
-    height: 25px;
-    background-color: green;
+    background-color: yellowgreen;
     top: 0px;
     left: 0px;
-    border-radius: 25px;
-    text-align: center;
-    margin-top: -10px;
-    color: white;
+    margin-top: -15px;
 }
 
 .attack-orb {
-    position: relative;
-    width: 25px;
-    height: 25px;
-    background-color: red;
+    background-color: dodgerblue;
     bottom: 0px;
     left: 0px;
-    border-radius: 25px;
-    text-align: center;
-    margin-top: 120px;
-    color: white;
+    margin-top: 125px;
 }
 
 .health-orb {
-    position: relative;
-    width: 25px;
-    height: 25px;
-    background-color: blue;
+    background-color: tomato;
     bottom: 0px;
     right: 0px;
     left: auto;
-    border-radius: 25px;
-    text-align: center;
-    margin-left: 80px;
+    margin-left: 82px;
     margin-top: -25px;
-    color: white;
 }

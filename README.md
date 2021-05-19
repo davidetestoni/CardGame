@@ -44,6 +44,7 @@ Features:
 - Plug and play assemblies to switch between card sets
 - Can be integrated with Unity/Godot or other C# based engines
 - Includes built-in features such as Rush or Taunt so you don't have to implement them yourself
+- Rich event-based notifications when the state of any part of the game changes
 
 Based on:
 - [LiteNetLib](https://github.com/RevenantX/LiteNetLib) for reliable UDP messaging

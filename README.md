@@ -49,11 +49,17 @@ Features:
 Based on:
 - [LiteNetLib](https://github.com/RevenantX/LiteNetLib) for reliable UDP messaging
 - [spectre.console](https://github.com/spectreconsole/spectre.console) for colored and organized logs
+- [picrew.me](https://picrew.me/image_maker/6883) for card arts of the sample game (drawn by ザズズ)
 
 ### Screenshots
 Dedicated server live game log
 
 ![image](https://user-images.githubusercontent.com/50030666/118831410-0ca05d80-b8c0-11eb-83d4-51ea82452d02.png)
+
+The Blazor client
+
+![image](https://user-images.githubusercontent.com/50030666/118871598-002ffb00-b8e8-11eb-8f2b-d021b356c4e1.png)
+
 
 ### Future steps
 These are the things I would like to implement if I happen to have some spare time, in order of importance

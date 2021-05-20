@@ -38,7 +38,7 @@ public class LizzieInstance : CreatureCardInstance
 Features:
 - Card-centric
 - Unit tests for basic functionalities already included
-- Easy to write your own unit tests to make sure your cards behave exactly as they're meant to
+- Easily write your own unit tests to make sure your cards behave exactly as they're meant to
 - Dedicated server to prevent cheating
 - Sample game with .NET 5 Console-based and web-based (Blazor) clients
 - Plug and play assemblies to switch between card sets

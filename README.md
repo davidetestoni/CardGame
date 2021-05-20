@@ -11,13 +11,13 @@ This framework lets you write code to define custom effects, which should be mor
 
 This is an example from the included `SampleGame` project that you can use to understand how to build your game:
 ```cs
-[PlayableCard(typeof(AttackerInstance))]
-public class Attacker : CreatureCard
+[PlayableCard(typeof(LizzieInstance))]
+public class Lizzie : CreatureCard
 {
-    public Attacker()
+    public Lizzie()
     {
-        ShortName = "Attacker"; // The unique name that identifies this card
-        Name = "Attacker"; // The pretty name of this card
+        ShortName = "Lizzie"; // The unique name that identifies this card
+        Name = "Lizzie"; // The pretty name of this card
         Description = "When attacking, deal 1 more damage."; // A brief description of the effects of the card.
         Art = "ART_RESOURCE_HERE";
 
@@ -27,7 +27,7 @@ public class Attacker : CreatureCard
     }
 }
 
-public class AttackerInstance : CreatureCardInstance
+public class LizzieInstance : CreatureCardInstance
 {
     // When attacking, deal 1 more damage
     public override int GetAttackDamage(CreatureCardInstance target, bool isAttacking)
